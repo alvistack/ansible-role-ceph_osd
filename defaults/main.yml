@@ -21,9 +21,7 @@ ceph_version: "nautilus"
 ceph_fsid: "{{ ansible_play_hosts[0] | to_uuid }}"
 
 # Ceph osd devices for passing to ceph_volume.
-ceph_volume: [
-#   - { objectstore: "bluestore", data: "/dev/sdc" }
-]
+ceph_volume: []
 
 # Ceph osd configs.
 ceph_osd_config:
