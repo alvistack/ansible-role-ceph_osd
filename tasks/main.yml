@@ -77,13 +77,25 @@
   with_items: "{{ ceph_osd_config }}"
   tags: ceph_osd
 
-- name: create osd
+- name: ceph-volume lvm create
   shell: |
     set -o pipefail
-    ceph-volume lvm create --{{ ceph_osd_objectstore }} --data {{ item }}
+    ceph-volume lvm create
+      --{{ item.objectstore }} \
+      --data {{ item.data }}
   args:
     executable: "/bin/bash"
-  with_items: "{{ ceph_osd_device }}"
+  with_items: "{{ ceph_volume }}"
+  changed_when: false
+  ignore_errors: true
+  tags: ceph_osd
+
+- name: ceph-volume lvm activate
+  shell: |
+    set -o pipefail
+    ceph-volume lvm activate --all
+  args:
+    executable: "/bin/bash"
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
