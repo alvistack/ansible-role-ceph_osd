@@ -106,6 +106,10 @@
     - ceph_osd | systemctl restart
   tags: ceph_osd
 
+- name: flush handlers
+  meta: flush_handlers
+  tags: ceph_osd
+
 - name: ceph-volume lvm create
   shell: |
     set -o pipefail
@@ -117,10 +121,6 @@
   with_items: "{{ ceph_volume }}"
   changed_when: false
   ignore_errors: true
-  tags: ceph_osd
-
-- name: flush handlers
-  meta: flush_handlers
   tags: ceph_osd
 
 - name: enable services
