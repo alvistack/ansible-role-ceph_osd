@@ -86,6 +86,15 @@
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
 
   post_tasks:
+    - name: ceph-volume lvm activate
+      shell: |
+        set -o pipefail
+        ceph-volume lvm activate --all
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
     - name: ceph --status
       command: ceph --status
       register: result

@@ -89,13 +89,3 @@
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
-
-- name: ceph-volume lvm activate
-  shell: |
-    set -o pipefail
-    ceph-volume lvm activate --all
-  args:
-    executable: "/bin/bash"
-  changed_when: false
-  ignore_errors: true
-  tags: ceph_osd
