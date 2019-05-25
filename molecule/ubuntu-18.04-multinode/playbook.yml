@@ -90,8 +90,8 @@
   roles:
     - role: ceph-osd
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
-      ceph_osd_device:
-        - "/dev/sdc"
+      ceph_volume:
+        - { objectstore: "bluestore", data: "/dev/sdc" }
 
   post_tasks:
     - name: ceph-volume lvm activate
