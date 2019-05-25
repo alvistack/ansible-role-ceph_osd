@@ -54,7 +54,6 @@
     state: "{{ item.state | default('directory') }}"
   with_items:
     - { dest: "/etc/ceph" }
-    - { dest: "/var/lib/ceph/osd/ceph-{{ inventory_hostname }}", owner: "ceph", group: "ceph" }
   tags: ceph_osd
 
 - name: touch files
@@ -76,4 +75,15 @@
     option: "{{ item.option }}"
     value: "{{ item.value }}"
   with_items: "{{ ceph_osd_config }}"
+  tags: ceph_osd
+
+- name: create osd
+  shell: |
+    set -o pipefail
+    ceph-volume lvm create --{{ ceph_osd_objectstore }} --data {{ item }}
+  args:
+    executable: "/bin/bash"
+  with_items: "{{ ceph_osd_device }}"
+  changed_when: false
+  ignore_errors: true
   tags: ceph_osd

@@ -17,36 +17,59 @@
 scenario:
   name: ubuntu-18.04-multinode
 driver:
-  name: lxd
+  name: vagrant
+  provider:
+    name: virtualbox
 platforms:
   - name: ${MOLECULE_INSTANCE_NAME}-1
-    url: unix:/var/snap/lxd/common/lxd/unix.socket
-    source:
-      server: https://images.linuxcontainers.org
-      protocol: simplestreams
-      alias: ubuntu/bionic/amd64
+    box: ubuntu/bionic64
+    cpu: 2
+    memory: 1024
+    interfaces:
+      - network_name: public_network
+        use_dhcp_assigned_default_route: true
+        auto_config: true
+        bridge: wlp2s0
+    provider_raw_config_args:
+      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
+      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
+      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
     groups:
       - ceph-mon
       - ceph-mgr
       - ceph-osd
       - ceph-mds
   - name: ${MOLECULE_INSTANCE_NAME}-2
-    url: unix:/var/snap/lxd/common/lxd/unix.socket
-    source:
-      server: https://images.linuxcontainers.org
-      protocol: simplestreams
-      alias: ubuntu/bionic/amd64
+    box: ubuntu/bionic64
+    cpu: 2
+    memory: 1024
+    interfaces:
+      - network_name: public_network
+        use_dhcp_assigned_default_route: true
+        auto_config: true
+        bridge: wlp2s0
+    provider_raw_config_args:
+      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
+      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
+      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
     groups:
       - ceph-mon
       - ceph-mgr
       - ceph-osd
       - ceph-mds
   - name: ${MOLECULE_INSTANCE_NAME}-3
-    url: unix:/var/snap/lxd/common/lxd/unix.socket
-    source:
-      server: https://images.linuxcontainers.org
-      protocol: simplestreams
-      alias: ubuntu/bionic/amd64
+    box: ubuntu/bionic64
+    cpu: 2
+    memory: 1024
+    interfaces:
+      - network_name: public_network
+        use_dhcp_assigned_default_route: true
+        auto_config: true
+        bridge: wlp2s0
+    provider_raw_config_args:
+      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
+      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
+      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
     groups:
       - ceph-mon
       - ceph-mgr

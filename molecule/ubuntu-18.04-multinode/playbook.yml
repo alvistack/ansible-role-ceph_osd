@@ -16,6 +16,7 @@
 
 - hosts: all
   remote_user: root
+  become: true
   roles:
     - role: bootstrap
     - role: ntp
@@ -39,9 +40,16 @@
 
 - hosts: ceph-mon
   remote_user: root
+  become: true
   roles:
     - role: ceph-mon
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+      ceph_mon_host: >-
+        {%- for host in ansible_play_hosts -%}
+        {{ hostvars[host]['ansible_enp0s8']['ipv4']['address'] }},
+        {%- endfor -%}
+      ceph_public_network: "{{ (ansible_enp0s8.ipv4.network + '/' + ansible_enp0s8.ipv4.netmask) | ipaddr('net') }}"
+      ceph_cluster_network: "{{ ceph_public_network }}"
 
   post_tasks:
     - name: start services
@@ -58,6 +66,7 @@
 
 - hosts: ceph-mgr
   remote_user: root
+  become: true
   roles:
     - role: ceph-mgr
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
@@ -77,9 +86,12 @@
 
 - hosts: ceph-osd
   remote_user: root
+  become: true
   roles:
     - role: ceph-osd
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+      ceph_osd_device:
+        - "/dev/sdc"
 
   post_tasks:
     - name: ceph --status
