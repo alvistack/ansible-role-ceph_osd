@@ -25,15 +25,14 @@ platforms:
     box: ubuntu/bionic64
     cpu: 2
     memory: 1024
-    interfaces:
-      - network_name: public_network
-        use_dhcp_assigned_default_route: true
-        auto_config: true
-        bridge: wlp2s0
+    provision: true
+    instance_raw_config_args:
+      - "vm.network 'public_network', use_dhcp_assigned_default_route: true, bridge: 'wlp2s0'"
+      - "vm.provision 'shell', run: 'always', inline: 'route del default gw 10.0.2.2'"
     provider_raw_config_args:
-      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
-      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
-      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
+      - "customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]"
+      - "customize [ 'createhd', '--filename', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\", '--size', 10 * 1024 ]"
+      - "customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\" ]"
     groups:
       - ceph-mon
       - ceph-mgr
@@ -43,15 +42,14 @@ platforms:
     box: ubuntu/bionic64
     cpu: 2
     memory: 1024
-    interfaces:
-      - network_name: public_network
-        use_dhcp_assigned_default_route: true
-        auto_config: true
-        bridge: wlp2s0
+    provision: true
+    instance_raw_config_args:
+      - "vm.network 'public_network', use_dhcp_assigned_default_route: true, bridge: 'wlp2s0'"
+      - "vm.provision 'shell', run: 'always', inline: 'route del default gw 10.0.2.2'"
     provider_raw_config_args:
-      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
-      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
-      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
+      - "customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]"
+      - "customize [ 'createhd', '--filename', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\", '--size', 10 * 1024 ]"
+      - "customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\" ]"
     groups:
       - ceph-mon
       - ceph-mgr
@@ -61,15 +59,14 @@ platforms:
     box: ubuntu/bionic64
     cpu: 2
     memory: 1024
-    interfaces:
-      - network_name: public_network
-        use_dhcp_assigned_default_route: true
-        auto_config: true
-        bridge: wlp2s0
+    provision: true
+    instance_raw_config_args:
+      - "vm.network 'public_network', use_dhcp_assigned_default_route: true, bridge: 'wlp2s0'"
+      - "vm.provision 'shell', run: 'always', inline: 'route del default gw 10.0.2.2'"
     provider_raw_config_args:
-      - customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
-      - customize [ 'createhd', '--filename', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi", '--size', 10 * 1024 ]
-      - customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', "/tmp/#{vagrant_config_hash['instance']['name']}.vdi" ]
+      - "customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]"
+      - "customize [ 'createhd', '--filename', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\", '--size', 10 * 1024 ]"
+      - "customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\" ]"
     groups:
       - ceph-mon
       - ceph-mgr

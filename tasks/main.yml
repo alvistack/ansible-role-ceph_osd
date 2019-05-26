@@ -110,19 +110,6 @@
   meta: flush_handlers
   tags: ceph_osd
 
-- name: ceph-volume lvm create
-  shell: |
-    set -o pipefail
-    ceph-volume lvm create \
-      --{{ item.objectstore }} \
-      --data {{ item.data }}
-  args:
-    executable: "/bin/bash"
-  with_items: "{{ ceph_volume }}"
-  changed_when: false
-  ignore_errors: true
-  tags: ceph_osd
-
 - name: enable services
   shell: |
     set -o pipefail

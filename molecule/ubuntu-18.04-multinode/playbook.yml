@@ -20,7 +20,14 @@
   roles:
     - role: bootstrap
     - role: ntp
+
+- hosts: ceph-mon
+  remote_user: root
+  become: true
+  roles:
     - role: ceph-common
+      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+    - role: ceph-mon
 
   post_tasks:
     - name: ceph --version
@@ -38,20 +45,6 @@
       register: result
       changed_when: result is not succeeded
 
-- hosts: ceph-mon
-  remote_user: root
-  become: true
-  roles:
-    - role: ceph-mon
-      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
-      ceph_mon_host: >-
-        {%- for host in ansible_play_hosts -%}
-        {{ hostvars[host]['ansible_enp0s8']['ipv4']['address'] }},
-        {%- endfor -%}
-      ceph_public_network: "{{ (ansible_enp0s8.ipv4.network + '/' + ansible_enp0s8.ipv4.netmask) | ipaddr('net') }}"
-      ceph_cluster_network: "{{ ceph_public_network }}"
-
-  post_tasks:
     - name: start services
       service:
         name: "ceph-mon@{{ ansible_hostname }}"
@@ -68,8 +61,9 @@
   remote_user: root
   become: true
   roles:
-    - role: ceph-mgr
+    - role: ceph-common
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+    - role: ceph-mgr
 
   post_tasks:
     - name: start services
@@ -88,12 +82,22 @@
   remote_user: root
   become: true
   roles:
-    - role: ceph-osd
+    - role: ceph-common
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
-      ceph_volume:
-        - { objectstore: "bluestore", data: "/dev/sdc" }
+    - role: ceph-osd
 
   post_tasks:
+    - name: ceph-volume lvm create
+      shell: |
+        set -o pipefail
+        ceph-volume lvm create \
+          --bluestore \
+          --data /dev/sdc
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
     - name: ceph-volume lvm activate
       shell: |
         set -o pipefail
