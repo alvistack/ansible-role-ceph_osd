@@ -87,8 +87,9 @@
   ini_file:
     path: "/etc/ceph/ceph.conf"
     section: "{{ item.section }}"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
+    option: "{{ item.option | default(None) or omit }}"
+    value: "{{ item.value | default(None) or omit }}"
+    state: "{{ item.state | default('present') }}"
   with_items: "{{ ceph_osd_config }}"
   tags: ceph_osd
 

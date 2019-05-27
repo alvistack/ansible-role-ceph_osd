@@ -19,7 +19,7 @@ ceph_version: "nautilus"
 
 # Ceph osd configs.
 ceph_osd_config:
-  - { section: "osd", option: "osd max write size", value: "512" }
-  - { section: "osd", option: "osd disk threads", value: "2" }
-  - { section: "osd", option: "osd map cache size", value: "256" }
-  - { section: "osd", option: "osd memory target", value: "4294967296" }
+  - { state: "present", section: "osd", option: "osd max write size", value: "512" }
+  - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
+  - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
+  - { state: "present", section: "osd", option: "osd memory target", value: "4294967296" }
