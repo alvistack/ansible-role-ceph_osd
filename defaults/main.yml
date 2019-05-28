@@ -17,19 +17,9 @@
 # Ceph version.
 ceph_version: "nautilus"
 
-# Ceph fsid.
-ceph_fsid: "{{ ansible_play_hosts[0] | to_uuid }}"
-
-# Ceph osd devices.
-ceph_osd_device:
-  - /dev/nonexistent
-
 # Ceph osd configs.
 ceph_osd_config:
-  - { section: "osd", option: "osd max write size", value: "512" }
-  - { section: "osd", option: "osd disk threads", value: "2" }
-  - { section: "osd", option: "osd map cache size", value: "256" }
-  - { section: "osd", option: "osd memory target", value: "4294967296" }
-  - { section: "osd", option: "osd pool default crush rule", value: "1" }
-  - { section: "osd", option: "osd pool default pg num", value: "8" }
-  - { section: "osd", option: "osd pool default size", value: "1" }
+  - { state: "present", section: "osd", option: "osd max write size", value: "512" }
+  - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
+  - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
+  - { state: "present", section: "osd", option: "osd memory target", value: "4294967296" }

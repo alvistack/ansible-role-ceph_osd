@@ -54,7 +54,21 @@
     state: "{{ item.state | default('directory') }}"
   with_items:
     - { dest: "/etc/ceph" }
-    - { dest: "/var/lib/ceph/osd/ceph-{{ inventory_hostname }}", owner: "ceph", group: "ceph" }
+    - { dest: "/lib/systemd/system" }
+  tags: ceph_osd
+
+- name: copy templates
+  template:
+    src: "./templates{{ item.dest }}.j2"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  with_items:
+    - { dest: "/lib/systemd/system/ceph-osd@.service" }
+  notify:
+    - ceph_osd | systemctl daemon-reload
+    - ceph_osd | systemctl restart
   tags: ceph_osd
 
 - name: touch files
@@ -73,7 +87,40 @@
   ini_file:
     path: "/etc/ceph/ceph.conf"
     section: "{{ item.section }}"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
+    option: "{{ item.option | default(None) or omit }}"
+    value: "{{ item.value | default(None) or omit }}"
+    state: "{{ item.state | default('present') }}"
   with_items: "{{ ceph_osd_config }}"
+  tags: ceph_osd
+
+- name: prepare files
+  file:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+    state: "{{ item.state | default('file') }}"
+  with_items:
+    - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
+    - { dest: "/lib/systemd/system/ceph-osd@.service" }
+  notify:
+    - ceph_osd | systemctl restart
+  tags: ceph_osd
+
+- name: flush handlers
+  meta: flush_handlers
+  tags: ceph_osd
+
+- name: enable services
+  shell: |
+    set -o pipefail
+    systemctl enable ceph-osd.target
+    ls -1d /var/lib/ceph/osd/* | while read line; do
+      id=$(echo $line | sed 's/\/var\/lib\/ceph\/osd\/ceph-\([0-9]*\)/\1/g')
+      systemctl enable ceph-osd@$id
+    done
+  args:
+    executable: "/bin/bash"
+  changed_when: false
+  ignore_errors: true
   tags: ceph_osd

@@ -16,10 +16,18 @@
 
 - hosts: all
   remote_user: root
+  become: true
   roles:
     - role: bootstrap
     - role: ntp
+
+- hosts: ceph-mon
+  remote_user: root
+  become: true
+  roles:
     - role: ceph-common
+      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+    - role: ceph-mon
 
   post_tasks:
     - name: ceph --version
@@ -37,13 +45,6 @@
       register: result
       changed_when: result is not succeeded
 
-- hosts: ceph-mon
-  remote_user: root
-  roles:
-    - role: ceph-mon
-      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
-
-  post_tasks:
     - name: start services
       service:
         name: "ceph-mon@{{ ansible_hostname }}"
@@ -58,9 +59,11 @@
 
 - hosts: ceph-mgr
   remote_user: root
+  become: true
   roles:
-    - role: ceph-mgr
+    - role: ceph-common
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+    - role: ceph-mgr
 
   post_tasks:
     - name: start services
@@ -77,11 +80,33 @@
 
 - hosts: ceph-osd
   remote_user: root
+  become: true
   roles:
-    - role: ceph-osd
+    - role: ceph-common
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
+    - role: ceph-osd
 
   post_tasks:
+    - name: ceph-volume lvm create
+      shell: |
+        set -o pipefail
+        ceph-volume lvm create \
+          --bluestore \
+          --data /dev/sdc
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
+    - name: ceph-volume lvm activate
+      shell: |
+        set -o pipefail
+        ceph-volume lvm activate --all
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
     - name: ceph --status
       command: ceph --status
       register: result
