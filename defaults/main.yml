@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Ceph version.
-ceph_version: "nautilus"
+ceph_release: "nautilus"
 
 # Ceph osd configs.
 ceph_osd_config:
