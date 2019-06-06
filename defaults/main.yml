@@ -17,6 +17,9 @@
 # Ceph version.
 ceph_release: "nautilus"
 
+# Ceph volume for osd.
+ceph_volume: []
+
 # Ceph osd configs.
 ceph_osd_config:
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
