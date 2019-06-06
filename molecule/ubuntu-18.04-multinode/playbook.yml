@@ -133,10 +133,19 @@
     - role: ceph-common
       ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
     - role: ceph-osd
-      ceph_volume:
-        - { action: "create", objectstore: "bluestore", data: "/dev/sdc" }
 
   post_tasks:
+    - name: ceph-volume lvm create
+      shell: |
+        set -o pipefail
+        ceph-volume lvm create \
+          --bluestore \
+          --data /dev/sdc
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
     - name: ceph-volume lvm activate
       shell: |
         set -o pipefail
