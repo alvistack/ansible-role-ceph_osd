@@ -21,13 +21,20 @@
     - role: bootstrap
     - role: ntp
 
-- hosts: ceph-mon
+- hosts: ceph-mon:ceph-mgr:ceph-osd:ceph-mds:ceph-rgw
   remote_user: root
   become: true
   roles:
     - role: ceph-common
-      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
-    - role: ceph-mon
+      ceph_fsid: "{{ hostvars[groups['ceph-mon'][0]]['ansible_machine_id'] | to_uuid }}"
+      ceph_mon_initial_members: >-
+        {%- for host in groups['ceph-mon'] -%}
+        {{ host }},
+        {%- endfor -%}
+      ceph_mon_host: >-
+        {%- for host in groups['ceph-mon'] -%}
+        {{ hostvars[host]['ansible_default_ipv4']['address'] }},
+        {%- endfor -%}
 
   post_tasks:
     - name: ceph --version
@@ -45,6 +52,13 @@
       register: result
       changed_when: result is not succeeded
 
+- hosts: ceph-mon
+  remote_user: root
+  become: true
+  roles:
+    - role: ceph-mon
+
+  post_tasks:
     - name: start services
       service:
         name: "ceph-mon@{{ ansible_hostname }}"
@@ -85,8 +99,6 @@
       changed_when: base64_decode_result is not succeeded
 
   roles:
-    - role: ceph-common
-      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
     - role: ceph-mgr
 
   post_tasks:
@@ -130,8 +142,6 @@
       changed_when: base64_decode_result is not succeeded
 
   roles:
-    - role: ceph-common
-      ceph_fsid: "{{ groups['ceph-mon'][0] | to_uuid }}"
     - role: ceph-osd
 
   post_tasks:

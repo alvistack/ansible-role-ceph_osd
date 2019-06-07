@@ -27,6 +27,13 @@ platforms:
       alias: centos/7/amd64
     groups:
       - ceph-mon
+  - name: ${MOLECULE_INSTANCE_NAME}-4
+    url: unix:/var/snap/lxd/common/lxd/unix.socket
+    source:
+      server: https://images.linuxcontainers.org
+      protocol: simplestreams
+      alias: centos/7/amd64
+    groups:
       - ceph-mgr
       - ceph-osd
       - ceph-mds
