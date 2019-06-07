@@ -49,6 +49,7 @@ platforms:
       - "customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\" ]"
     groups:
       - ceph-mon
+      - ceph-osd
   - name: ${MOLECULE_INSTANCE_NAME}-3
     box: ubuntu/bionic64
     cpu: 2
@@ -63,6 +64,7 @@ platforms:
       - "customize [ 'storageattach', :id, '--storagectl', 'SCSI', '--port', 3, '--device', 0, '--type', 'hdd', '--medium', \"/tmp/#{vagrant_config_hash['instance']['name']}.vmdk\" ]"
     groups:
       - ceph-mon
+      - ceph-osd
   - name: ${MOLECULE_INSTANCE_NAME}-4
     box: ubuntu/bionic64
     cpu: 2
