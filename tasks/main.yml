@@ -94,6 +94,8 @@
     value: "{{ item.value | default(None) or omit }}"
     state: "{{ item.state | default('present') }}"
   with_items: "{{ ceph_osd_config }}"
+  notify:
+    - ceph_osd | systemctl restart
   tags: ceph_osd
 
 - name: prepare files
