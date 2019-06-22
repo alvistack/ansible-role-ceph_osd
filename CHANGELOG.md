@@ -4,6 +4,10 @@
 
 ### Major Changes
 
+  - Update LXD test profile for Kubernetes v1.15.0 support
+  - Update molecule \>=2.22rc1 for Ansible 2.8.0 support
+  - Reduce default `osd memory target` for better all-in-one support
+
 ## 3.1.0 - 2019-06-13
 
 ### Major Changes
