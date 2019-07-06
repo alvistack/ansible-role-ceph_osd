@@ -55,7 +55,7 @@
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0755') }}"
     state: "{{ item.state | default('directory') }}"
-  with_items:
+  loop:
     - { dest: "/etc/ceph" }
     - { dest: "/lib/systemd/system" }
   tags: ceph_osd
@@ -67,7 +67,7 @@
     owner: "{{ item.owner | default('root') }}"
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0644') }}"
-  with_items:
+  loop:
     - { dest: "/lib/systemd/system/ceph-osd@.service" }
   notify:
     - ceph_osd | systemctl daemon-reload
@@ -82,7 +82,7 @@
     mode: "{{ item.mode | default('0644') }}"
     content: ""
     force: false
-  with_items:
+  loop:
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
   tags: ceph_osd
 
@@ -93,7 +93,7 @@
     option: "{{ item.option | default(None) or omit }}"
     value: "{{ item.value | default(None) or omit }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ ceph_osd_config }}"
+  loop: "{{ ceph_osd_config }}"
   notify:
     - ceph_osd | systemctl restart
   tags: ceph_osd
@@ -105,7 +105,7 @@
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0644') }}"
     state: "{{ item.state | default('file') }}"
-  with_items:
+  loop:
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
     - { dest: "/lib/systemd/system/ceph-osd@.service" }
   notify:
