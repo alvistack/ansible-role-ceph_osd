@@ -79,9 +79,9 @@
     - name: base64 encode keyring
       shell: |
         set -o pipefail
-        tar zcfP - {{ item.value | join(' ') }} | base64 -w 0
-      with_dict:
-        base64:
+        tar zcfP - {{ _params | join(' ') }} | base64 -w 0
+      vars:
+        _params:
           - "/etc/ceph/ceph.client.admin.keyring"
           - "/var/lib/ceph/bootstrap-mgr/ceph.keyring"
       args:
@@ -93,7 +93,7 @@
     - name: base64 decode certificates
       shell: |
         set -o pipefail
-        echo -n {{ base64_encode_result.results[0].stdout | quote }} | base64 -d | tar zx -C /
+        echo -n {{ base64_encode_result.stdout | quote }} | base64 -d | tar zx -C /
       args:
         executable: "/bin/bash"
       register: base64_decode_result
@@ -122,9 +122,9 @@
     - name: base64 encode keyring
       shell: |
         set -o pipefail
-        tar zcfP - {{ item.value | join(' ') }} | base64 -w 0
-      with_dict:
-        base64:
+        tar zcfP - {{ _params | join(' ') }} | base64 -w 0
+      vars:
+        _params:
           - "/etc/ceph/ceph.client.admin.keyring"
           - "/var/lib/ceph/bootstrap-osd/ceph.keyring"
       args:
@@ -136,7 +136,7 @@
     - name: base64 decode certificates
       shell: |
         set -o pipefail
-        echo -n {{ base64_encode_result.results[0].stdout | quote }} | base64 -d | tar zx -C /
+        echo -n {{ base64_encode_result.stdout | quote }} | base64 -d | tar zx -C /
       args:
         executable: "/bin/bash"
       register: base64_decode_result
