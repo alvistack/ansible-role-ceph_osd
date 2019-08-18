@@ -2,7 +2,9 @@
 
 ## 3.3.0 - TBC
 
-### Major Changes
+### Major Changes 
+
+  - Restart service serially
 
 ## 3.2.0 - 2019-07-08
 

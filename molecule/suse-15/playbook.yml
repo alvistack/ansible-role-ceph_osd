@@ -62,7 +62,7 @@
     - name: start services
       service:
         name: "ceph-mon@{{ ansible_hostname }}"
-        state: started
+        state: "started"
       changed_when: false
       ignore_errors: true
 
@@ -105,7 +105,7 @@
     - name: start services
       service:
         name: "ceph-mgr@{{ ansible_hostname }}"
-        state: started
+        state: "started"
       changed_when: false
       ignore_errors: true
 
