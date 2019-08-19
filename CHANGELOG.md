@@ -2,9 +2,9 @@
 
 ## 3.3.0 - TBC
 
-### Major Changes
+### Major Changes 
 
-  - Update LXD test profile for openSUSE LEAP 15.1
+  - Restart service serially
 
 ## 3.2.0 - 2019-07-08
 
