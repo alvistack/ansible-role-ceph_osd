@@ -32,6 +32,6 @@
     executable: "/bin/bash"
   loop: "{{ ansible_play_hosts }}"
   delegate_to: "{{ item }}"
-  run_ocne: true
+  run_once: true
   changed_when: false
   ignore_errors: true
