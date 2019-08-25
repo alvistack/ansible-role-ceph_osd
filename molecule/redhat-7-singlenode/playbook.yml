@@ -33,10 +33,10 @@
         {%- endfor -%}
       ceph_mon_host: >-
         {%- for host in groups['ceph-mon'] -%}
-        {{ hostvars[host].ansible_enp0s8.ipv4.address }},
+        {{ hostvars[host].ansible_eth1.ipv4.address }},
         {%- endfor -%}
-      ceph_public_network: "{{ (ansible_enp0s8.ipv4.network + '/' + ansible_enp0s8.ipv4.netmask) | ipaddr('net') }}"
-      ceph_cluster_network: "{{ (ansible_enp0s8.ipv4.network + '/' + ansible_enp0s8.ipv4.netmask) | ipaddr('net') }}"
+      ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
+      ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
   post_tasks:
     - name: ceph --version
