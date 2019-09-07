@@ -19,7 +19,7 @@
   become: true
   roles:
     - role: bootstrap
-    - role: ntp
+    - role: chrony
 
 - hosts: ceph-mon:ceph-mgr:ceph-osd:ceph-mds:ceph-rgw
   remote_user: root
