@@ -42,16 +42,6 @@
       register: result
       changed_when: result is not succeeded
 
-    - name: ceph-fuse --version
-      command: ceph-fuse --version
-      register: result
-      changed_when: result is not succeeded
-
-    - name: rbd-fuse --version
-      command: rbd-fuse --version
-      register: result
-      changed_when: result is not succeeded
-
 - hosts: ceph-mon
   remote_user: root
   become: true
