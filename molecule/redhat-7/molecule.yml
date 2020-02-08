@@ -20,7 +20,7 @@ driver:
     name: libvirt
 platforms:
   - name: ${MOLECULE_INSTANCE_NAME}-1
-    box: generic/opensuse15
+    box: generic/rhel7
     cpu: 2
     memory: 4096
     interfaces:
@@ -28,8 +28,8 @@ platforms:
         network_name: private_network
         type: dhcp
     provider_raw_config_args:
-      - 'disk_bus = "sata"'
-      - 'storage :file, size: "10G", bus: "sata"'
+      - 'disk_bus = "virtio"'
+      - 'storage :file, size: "10G", bus: "virtio"'
     groups:
       - ceph-mon
       - ceph-mgr

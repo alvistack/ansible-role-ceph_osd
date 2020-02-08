@@ -33,8 +33,10 @@
         {%- endfor -%}
       ceph_mon_host: >-
         {%- for host in groups['ceph-mon'] -%}
-        {{ hostvars[host].ansible_default_ipv4.address }},
+        {{ hostvars[host].ansible_eth1.ipv4.address }},
         {%- endfor -%}
+      ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
+      ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
   post_tasks:
     - name: ceph --version
@@ -145,12 +147,36 @@
     - role: ceph-osd
 
   post_tasks:
+    - name: ceph-volume lvm create
+      shell: |
+        set -o pipefail
+        ceph-volume lvm create \
+          --bluestore \
+          --data /dev/vdb
+      args:
+        executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
     - name: ceph-volume lvm activate
       shell: |
         set -o pipefail
         ceph-volume lvm activate --all
       args:
         executable: "/bin/bash"
+      changed_when: false
+      ignore_errors: true
+
+    - name: ceph osd pool create rbd
+      shell: |
+        set -o pipefail
+        ceph osd pool create rbd 8 8
+        ceph osd pool set rbd size 1
+        ceph osd pool set rbd min_size 1
+        ceph osd pool application enable rbd rbd
+      args:
+        executable: "/bin/bash"
+      when: ansible_hostname == ansible_play_hosts[0]
       changed_when: false
       ignore_errors: true
 
