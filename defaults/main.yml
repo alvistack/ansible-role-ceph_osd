@@ -22,4 +22,4 @@ ceph_osd_config:
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
   - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
   - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
-  - { state: "present", section: "osd", option: "osd memory target", value: "1073741824" }
+  - { state: "present", section: "osd", option: "osd memory target", value: "268435456" }
