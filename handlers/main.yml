@@ -24,10 +24,7 @@
   shell: |
     set -o pipefail
     systemctl restart ceph-osd.target
-    ls -1d /var/lib/ceph/osd/* | while read line; do
-      id=$(echo $line | sed 's/\/var\/lib\/ceph\/osd\/ceph-\([0-9]*\)/\1/g')
-      systemctl restart ceph-osd@$id
-    done
+    systemctl restart ceph-osd@*
   args:
     executable: "/bin/bash"
   loop: "{{ ansible_play_hosts }}"
