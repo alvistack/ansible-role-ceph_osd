@@ -60,7 +60,7 @@
         set -o pipefail
         ceph-volume lvm create \
           --bluestore \
-          --data /dev/vdb
+          --data /dev/sdb
       args:
         executable: "/bin/bash"
       changed_when: false
