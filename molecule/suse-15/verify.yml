@@ -55,26 +55,6 @@
   remote_user: root
   become: true
   tasks:
-    - name: ceph-volume lvm create
-      shell: |
-        set -o pipefail
-        ceph-volume lvm create \
-          --bluestore \
-          --data /dev/sdb
-      args:
-        executable: "/bin/bash"
-      changed_when: false
-      ignore_errors: true
-
-    - name: ceph-volume lvm activate
-      shell: |
-        set -o pipefail
-        ceph-volume lvm activate --all
-      args:
-        executable: "/bin/bash"
-      changed_when: false
-      ignore_errors: true
-
     - name: ceph osd pool create rbd
       shell: |
         set -o pipefail

@@ -14,15 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Ceph version.
-ceph_release: "nautilus"
+ceph_fsid: "{{ hostvars[groups['ceph_mon'][0]].ansible_machine_id | to_uuid }}"
+ceph_mon_initial_members: >-
+  {%- for host in groups['ceph_mon'] -%}
+  {{ host }},
+  {%- endfor -%}
+ceph_mon_host: >-
+  {%- for host in groups['ceph_mon'] -%}
+  {{ hostvars[host].ansible_eth1.ipv4.address }},
+  {%- endfor -%}
+ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
+ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
-# Ceph osd configs.
-ceph_osd_config:
-  - { state: "present", section: "osd", option: "osd max write size", value: "512" }
-  - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
-  - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
-  - { state: "present", section: "osd", option: "osd memory target", value: "1073741824" }
-
-# Devices to be used as OSDs.
-ceph_volume: []
+ceph_volume:
+  - { objectstore: "bluestore", data: "/dev/vdb" }
