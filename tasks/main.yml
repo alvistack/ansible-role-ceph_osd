@@ -117,10 +117,14 @@
   tags: ceph_osd
 
 - name: enable services
-  service:
-    name: "ceph-osd.target"
-    state: "started"
-    enabled: true
+  shell: |
+    set -o pipefail
+    systemctl enable {{ item.name }}
+    systemctl start {{ item.name }}
+  args:
+    executable: "/bin/bash"
+  loop:
+    - { name: "ceph-osd.target" }
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
