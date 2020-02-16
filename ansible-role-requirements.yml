@@ -18,16 +18,16 @@
   src: https://github.com/alvistack/ansible-role-bootstrap
   version: develop
 
-- name: ceph-common
-  src: https://github.com/alvistack/ansible-role-ceph-common
+- name: ceph_common
+  src: https://github.com/alvistack/ansible-role-ceph_common
   version: develop
 
-- name: ceph-mon
-  src: https://github.com/alvistack/ansible-role-ceph-mon
+- name: ceph_mon
+  src: https://github.com/alvistack/ansible-role-ceph_mon
   version: develop
 
-- name: ceph-mgr
-  src: https://github.com/alvistack/ansible-role-ceph-mgr
+- name: ceph_mgr
+  src: https://github.com/alvistack/ansible-role-ceph_mgr
   version: develop
 
 - name: chrony

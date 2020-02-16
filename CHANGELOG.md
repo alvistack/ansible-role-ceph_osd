@@ -1,4 +1,4 @@
-# Ansible Role for ceph-osd
+# Ansible Role for Ceph Object Storage Daemon
 
 ## 4.3.0 - TBC
 

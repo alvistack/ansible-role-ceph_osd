@@ -21,30 +21,30 @@
     - role: bootstrap
     - role: chrony
 
-- hosts: ceph-mon:ceph-mgr:ceph-osd:ceph-mds:ceph-rgw
+- hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
   remote_user: root
   become: true
   roles:
-    - role: ceph-common
-      ceph_fsid: "{{ hostvars[groups['ceph-mon'][0]].ansible_machine_id | to_uuid }}"
+    - role: ceph_common
+      ceph_fsid: "{{ hostvars[groups['ceph_mon'][0]].ansible_machine_id | to_uuid }}"
       ceph_mon_initial_members: >-
-        {%- for host in groups['ceph-mon'] -%}
+        {%- for host in groups['ceph_mon'] -%}
         {{ host }},
         {%- endfor -%}
       ceph_mon_host: >-
-        {%- for host in groups['ceph-mon'] -%}
+        {%- for host in groups['ceph_mon'] -%}
         {{ hostvars[host].ansible_eth1.ipv4.address }},
         {%- endfor -%}
       ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
       ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
-- hosts: ceph-mon
+- hosts: ceph_mon
   remote_user: root
   become: true
   roles:
-    - role: ceph-mon
+    - role: ceph_mon
 
-- hosts: ceph-mgr
+- hosts: ceph_mgr
   remote_user: root
   become: true
   pre_tasks:
@@ -58,7 +58,7 @@
           - "/var/lib/ceph/bootstrap-mgr/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ groups['ceph-mon'][0] }}"
+      delegate_to: "{{ groups['ceph_mon'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
 
@@ -72,9 +72,9 @@
       changed_when: base64_decode_result is not succeeded
 
   roles:
-    - role: ceph-mgr
+    - role: ceph_mgr
 
-- hosts: ceph-osd
+- hosts: ceph_osd
   remote_user: root
   become: true
   pre_tasks:
@@ -88,7 +88,7 @@
           - "/var/lib/ceph/bootstrap-osd/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ groups['ceph-mon'][0] }}"
+      delegate_to: "{{ groups['ceph_mon'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
 
@@ -102,4 +102,4 @@
       changed_when: base64_decode_result is not succeeded
 
   roles:
-    - role: ceph-osd
+    - role: ceph_osd

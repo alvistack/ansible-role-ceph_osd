@@ -33,11 +33,11 @@ platforms:
       - 'volume_cache = "none"'
       - 'storage :file, bus: "virtio", cache: "none"'
     groups:
-      - ceph-mon
-      - ceph-mgr
-      - ceph-osd
-      - ceph-mds
-      - ceph-rgw
+      - ceph_mon
+      - ceph_mgr
+      - ceph_osd
+      - ceph_mds
+      - ceph_rgw
 lint:
   name: yamllint
 dependency:
