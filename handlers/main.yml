@@ -21,12 +21,9 @@
   ignore_errors: true
 
 - name: ceph_osd | systemctl restart
-  shell: |
-    set -o pipefail
-    systemctl restart ceph-osd.target
-    systemctl restart ceph-osd@*
-  args:
-    executable: "/bin/bash"
+  service:
+    name: "ceph-osd.target"
+    state: "restarted"
   loop: "{{ ansible_play_hosts }}"
   delegate_to: "{{ item }}"
   run_once: true
