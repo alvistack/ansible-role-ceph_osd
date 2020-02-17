@@ -1,11 +1,11 @@
-# Ansible Role for ceph-osd
+# Ansible Role for Ceph Object Storage Daemon
 
-[![Travis](https://img.shields.io/travis/alvistack/ansible-role-ceph-osd.svg)](https://travis-ci.org/alvistack/ansible-role-ceph-osd)
-[![GitHub release](https://img.shields.io/github/release/alvistack/ansible-role-ceph-osd.svg)](https://github.com/alvistack/ansible-role-ceph-osd)
-[![GitHub license](https://img.shields.io/github/license/alvistack/ansible-role-ceph-osd.svg)](https://github.com/alvistack/ansible-role-ceph-osd/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/alvistack/ansible-role-ceph_osd.svg)](https://travis-ci.org/alvistack/ansible-role-ceph_osd)
+[![GitHub release](https://img.shields.io/github/release/alvistack/ansible-role-ceph_osd.svg)](https://github.com/alvistack/ansible-role-ceph_osd)
+[![GitHub license](https://img.shields.io/github/license/alvistack/ansible-role-ceph_osd.svg)](https://github.com/alvistack/ansible-role-ceph_osd/blob/master/LICENSE)
 [![Ansible Role](https://img.shields.io/badge/galaxy-alvistack.ceph_osd-blue.svg)](https://galaxy.ansible.com/alvistack/ceph_osd)
 
-Ansible Role for ceph-osd Installation.
+Ansible Role for Ceph Object Storage Daemon Installation.
 
 ## Requirements
 

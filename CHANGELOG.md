@@ -1,8 +1,12 @@
-# Ansible Role for ceph-osd
+# Ansible Role for Ceph Object Storage Daemon
 
 ## 4.3.0 - TBC
 
 ### Major Changes
+
+  - Migrate role name to lowercase or underline
+  - Migrate group name to lowercase or underline
+  - Migrate molecule `group_vars` to file
 
 ## 4.2.0 - 2020-02-13
 

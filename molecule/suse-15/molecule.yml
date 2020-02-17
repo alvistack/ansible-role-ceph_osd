@@ -33,11 +33,26 @@ platforms:
       - 'volume_cache = "none"'
       - 'storage :file, bus: "sata", cache: "none"'
     groups:
-      - ceph-mon
-      - ceph-mgr
-      - ceph-osd
-      - ceph-mds
-      - ceph-rgw
+      - ceph_mon
+      - ceph_mgr
+      - ceph_osd
+  - name: ${MOLECULE_INSTANCE_NAME}-2
+    box: generic/opensuse15
+    cpu: 2
+    memory: 2048
+    interfaces:
+      - auto_config: true
+        network_name: private_network
+        type: dhcp
+    provider_raw_config_args:
+      - 'nic_model_type = "virtio"'
+      - 'disk_bus = "sata"'
+      - 'volume_cache = "none"'
+      - 'storage :file, bus: "sata", cache: "none"'
+    groups:
+      - ceph_mon
+      - ceph_mds
+      - ceph_rgw
 lint:
   name: yamllint
 dependency:
