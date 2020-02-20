@@ -126,6 +126,16 @@
   ignore_errors: true
   tags: ceph_osd
 
+- name: enable services
+  service:
+    name: "{{ item.name }}"
+    enabled: true
+  loop:
+    - { name: "ceph-osd.target" }
+  changed_when: false
+  ignore_errors: true
+  tags: ceph_osd
+
 - name: ceph-volume lvm activate
   ceph_volume:
     action: "activate"
@@ -133,13 +143,10 @@
   ignore_errors: true
   tags: ceph_osd
 
-- name: enable services
-  shell: |
-    set -o pipefail
-    systemctl enable {{ item.name }}
-    systemctl start {{ item.name }}
-  args:
-    executable: "/bin/bash"
+- name: start services
+  service:
+    name: "{{ item.name }}"
+    state: "started"
   loop:
     - { name: "ceph-osd.target" }
   changed_when: false
