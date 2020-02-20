@@ -112,26 +112,12 @@
     - ceph_osd | systemctl restart
   tags: ceph_osd
 
-- name: flush handlers
-  meta: flush_handlers
-  tags: ceph_osd
-
 - name: ceph-volume lvm create
   ceph_volume:
     objectstore: "{{ item.objectstore | default('bluestore') }}"
     data: "{{ item.data }}"
     action: "create"
   loop: "{{ ceph_volume }}"
-  changed_when: false
-  ignore_errors: true
-  tags: ceph_osd
-
-- name: enable services
-  service:
-    name: "{{ item.name }}"
-    enabled: true
-  loop:
-    - { name: "ceph-osd.target" }
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
@@ -143,10 +129,15 @@
   ignore_errors: true
   tags: ceph_osd
 
+- name: flush handlers
+  meta: flush_handlers
+  tags: ceph_osd
+
 - name: start services
   service:
     name: "{{ item.name }}"
     state: "started"
+    enabled: true
   loop:
     - { name: "ceph-osd.target" }
   changed_when: false
