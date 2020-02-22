@@ -418,6 +418,7 @@ def list_osd(module, container_image):
 
     return cmd
 
+
 def list_storage_inventory(module, container_image):
     '''
     List storage inventory.
@@ -428,6 +429,7 @@ def list_storage_inventory(module, container_image):
     cmd.append('--format=json')
 
     return cmd
+
 
 def activate_osd():
     '''
