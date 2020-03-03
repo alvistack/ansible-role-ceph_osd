@@ -17,26 +17,31 @@
 - hosts: all
   remote_user: root
   become: true
-  roles:
-    - role: bootstrap
-    - role: chrony
+  tasks:
+    - include_role:
+        name: bootstrap
+
+    - include_role:
+        name: chrony
 
 - hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
   remote_user: root
   become: true
-  roles:
-    - role: ceph_common
+  tasks:
+    - include_role:
+        name: ceph_common
 
 - hosts: ceph_mon
   remote_user: root
   become: true
-  roles:
-    - role: ceph_mon
+  tasks:
+    - include_role:
+        name: ceph_mon
 
 - hosts: ceph_mgr
   remote_user: root
   become: true
-  pre_tasks:
+  tasks:
     - name: base64 encode
       shell: |
         set -o pipefail
@@ -60,13 +65,13 @@
       register: base64_decode_result
       changed_when: base64_decode_result is not succeeded
 
-  roles:
-    - role: ceph_mgr
+    - include_role:
+        name: ceph_mgr
 
 - hosts: ceph_osd
   remote_user: root
   become: true
-  pre_tasks:
+  tasks:
     - name: base64 encode
       shell: |
         set -o pipefail
@@ -90,5 +95,5 @@
       register: base64_decode_result
       changed_when: base64_decode_result is not succeeded
 
-  roles:
-    - role: ceph_osd
+    - include_role:
+        name: ceph_osd
