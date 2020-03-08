@@ -16,17 +16,17 @@
 
 ceph_fsid: "{{ hostvars[groups['ceph_mon'][0]].ansible_machine_id | to_uuid }}"
 ceph_mon_initial_members: >-
-  {%- set _list = [] -%}
+  {%- set _params = [] -%}
   {%- for host in groups['ceph_mon'] -%}
-  {%-   set _list = _list.append(host) -%}
+  {%-   set _params = _params.append(host) -%}
   {%- endfor -%}
-  {{ _list | join(',') }}
+  {{ _params | join(',') }}
 ceph_mon_host: >-
-  {%- set _list = [] -%}
+  {%- set _params = [] -%}
   {%- for host in groups['ceph_mon'] -%}
-  {%-   set _list = _list.append(hostvars[host].ansible_eth1.ipv4.address) -%}
+  {%-   set _params = _params.append(hostvars[host].ansible_eth1.ipv4.address) -%}
   {%- endfor -%}
-  {{ _list | join(',') }}
+  {{ _params | join(',') }}
 ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
