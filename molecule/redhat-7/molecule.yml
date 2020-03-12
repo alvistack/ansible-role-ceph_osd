@@ -54,7 +54,7 @@ platforms:
       - ceph_mds
       - ceph_rgw
 lint: |
-  set -e
+  set -ex
   yamllint .
   ansible-lint
   flake8
