@@ -15,6 +15,11 @@
 # limitations under the License.
 
 _yum:
+  octopus:
+    - { state: "latest", name: "lvm2" }
+    - { state: "latest", name: "numactl" }
+    - { state: "latest", name: "parted" }
+    - { state: "latest", name: "ceph-osd" }
   nautilus:
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }

@@ -15,6 +15,7 @@
 # limitations under the License.
 
 _apt:
+  octopus: []
   nautilus:
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
