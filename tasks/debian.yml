@@ -19,7 +19,7 @@
     name: "{{ item.name }}"
     state: "{{ item.state }}"
     install_recommends: false
-  loop: "{{ _apt }}"
+  loop: "{{ _apt[ceph_release] }}"
   register: result
   until: result is succeeded
   notify:
