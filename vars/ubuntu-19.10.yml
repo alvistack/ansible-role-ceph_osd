@@ -15,8 +15,8 @@
 # limitations under the License.
 
 _apt:
-  octopus: []
-  nautilus:
+  "15.2": []
+  "14.2":
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
