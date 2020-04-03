@@ -1,6 +1,6 @@
 # Ansible Role for Ceph Object Storage Daemon
 
-[![Travis](https://img.shields.io/travis/alvistack/ansible-role-ceph_osd.svg)](https://travis-ci.org/alvistack/ansible-role-ceph_osd)
+[![Travis](https://img.shields.io/travis/com/alvistack/ansible-role-ceph_osd.svg)](https://travis-ci.com/alvistack/ansible-role-ceph_osd)
 [![GitHub release](https://img.shields.io/github/release/alvistack/ansible-role-ceph_osd.svg)](https://github.com/alvistack/ansible-role-ceph_osd)
 [![GitHub license](https://img.shields.io/github/license/alvistack/ansible-role-ceph_osd.svg)](https://github.com/alvistack/ansible-role-ceph_osd/blob/master/LICENSE)
 [![Ansible Role](https://img.shields.io/badge/galaxy-alvistack.ceph_osd-blue.svg)](https://galaxy.ansible.com/alvistack/ceph_osd)
