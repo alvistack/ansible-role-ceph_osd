@@ -14,10 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: bootstrap
-  src: https://github.com/alvistack/ansible-role-bootstrap
-  version: develop
-
 - name: ceph_common
   src: https://github.com/alvistack/ansible-role-ceph_common
   version: develop
@@ -28,8 +24,4 @@
 
 - name: ceph_mgr
   src: https://github.com/alvistack/ansible-role-ceph_mgr
-  version: develop
-
-- name: chrony
-  src: https://github.com/alvistack/ansible-role-chrony
   version: develop
