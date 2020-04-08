@@ -10,6 +10,7 @@
   - Migrate molecule `group_vars` to file
   - Consolidate molecule tests into `default` (noop)
   - Support CentOS/RHEL 8
+  - Support Ceph 15.2 Octopus
 
 ## 4.2.0 - 2020-02-13
 
