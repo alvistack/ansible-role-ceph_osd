@@ -24,11 +24,11 @@ ceph_mon_initial_members: >-
 ceph_mon_host: >-
   {%- set _params = [] -%}
   {%- for host in groups['ceph_mon'] -%}
-  {%-   set _params = _params.append(hostvars[host].ansible_default_ipv4.address) -%}
+  {%-   set _params = _params.append(hostvars[host].ansible_eth1.ipv4.address) -%}
   {%- endfor -%}
   {{ _params | join(',') }}
-ceph_public_network: "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ipaddr('net') }}"
-ceph_cluster_network: "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ipaddr('net') }}"
+ceph_public_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
+ceph_cluster_network: "{{ (ansible_eth1.ipv4.network + '/' + ansible_eth1.ipv4.netmask) | ipaddr('net') }}"
 
 ceph_volume:
   - { objectstore: "bluestore", data: "/dev/vdb" }
