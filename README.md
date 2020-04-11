@@ -11,7 +11,7 @@ Ansible Role for Ceph Object Storage Daemon Installation.
 
 This role require Ansible 2.9 or higher.
 
-This role was designed for Ubuntu 16.04/18.04/19.10 or RHEL/CentOS 7/8 or openSUSE Leap 15.1.
+This role was designed for Ubuntu 18.04/19.10/20.04 or RHEL/CentOS 7/8 or openSUSE Leap 15.1.
 
 ## Role Variables
 
@@ -28,7 +28,7 @@ This role was designed for Ubuntu 16.04/18.04/19.10 or RHEL/CentOS 7/8 or openSU
 ## License
 
   - Code released under [Apache License 2.0](LICENSE)
-  - Docs released under [CC BY 4.0](http://creativemons.org/licenses/by/4.0/)
+  - Docs released under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/)
 
 ## Author Information
 
