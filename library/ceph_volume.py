@@ -114,6 +114,24 @@ options:
             - Only applicable if action is 'batch'.
         required: false
         default: -1
+    journal_devices:
+        description:
+            - A list of devices for filestore journal to pass to the 'ceph-volume lvm batch' subcommand.
+            - Only applicable if action is 'batch'.
+            - Only applicable if objectstore is 'filestore'.
+        required: false
+    block_db_devices:
+        description:
+            - A list of devices for bluestore block db to pass to the 'ceph-volume lvm batch' subcommand.
+            - Only applicable if action is 'batch'.
+            - Only applicable if objectstore is 'bluestore'.
+        required: false
+    wal_devices:
+        description:
+            - A list of devices for bluestore block wal to pass to the 'ceph-volume lvm batch' subcommand.
+            - Only applicable if action is 'batch'.
+            - Only applicable if objectstore is 'bluestore'.
+        required: false
     report:
         description:
             - If provided the --report flag will be passed to 'ceph-volume lvm batch'.
@@ -189,7 +207,6 @@ def container_exec(binary, container_image):
     container_binary = os.getenv('CEPH_CONTAINER_BINARY')
     command_exec = [container_binary, 'run',
                     '--rm', '--privileged', '--net=host', '--ipc=host',
-                    '--ulimit', 'nofile=1024:4096',
                     '-v', '/run/lock/lvm:/run/lock/lvm:z',
                     '-v', '/var/run/udev/:/var/run/udev/:z',
                     '-v', '/dev:/dev', '-v', '/etc/ceph:/etc/ceph:z',
@@ -321,13 +338,16 @@ def batch(module, container_image):
     cmd.extend(batch_devices)
 
     if journal_devices and objectstore == 'filestore':
-        cmd.extend(['--journal-devices', ' '.join(journal_devices)])
+        cmd.append('--journal-devices')
+        cmd.extend(journal_devices)
 
     if block_db_devices and objectstore == 'bluestore':
-        cmd.extend(['--db-devices', ' '.join(block_db_devices)])
+        cmd.append('--db-devices')
+        cmd.extend(block_db_devices)
 
     if wal_devices and objectstore == 'bluestore':
-        cmd.extend(['--wal-devices', ' '.join(wal_devices)])
+        cmd.append('--wal-devices')
+        cmd.extend(wal_devices)
 
     return cmd
 
