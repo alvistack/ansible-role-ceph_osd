@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Ceph version.
-ceph_release: "14.2"
+ceph_release: "15.2"
 
 # Ceph osd configs.
 ceph_osd_config:
