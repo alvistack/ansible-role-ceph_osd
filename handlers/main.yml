@@ -20,7 +20,7 @@
   changed_when: false
   ignore_errors: true
 
-- name: ceph_osd | systemctl restart
+- name: ceph_osd | systemctl restart ceph-osd.target
   service:
     name: "ceph-osd.target"
     state: "restarted"
