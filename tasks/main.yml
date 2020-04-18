@@ -154,7 +154,7 @@
   meta: flush_handlers
   tags: ceph_osd
 
-- name: start services
+- name: systemctl start ceph-osd.target
   service:
     name: "ceph-osd.target"
     state: "started"
