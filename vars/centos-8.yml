@@ -20,4 +20,8 @@ _yum:
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
     - { state: "latest", name: "ceph-osd" }
-  "14.2": []
+  "14.2":
+    - { state: "latest", name: "lvm2" }
+    - { state: "latest", name: "numactl" }
+    - { state: "latest", name: "parted" }
+    - { state: "latest", name: "ceph-osd" }
