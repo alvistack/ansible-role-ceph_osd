@@ -156,11 +156,9 @@
 
 - name: start services
   service:
-    name: "{{ item.name }}"
+    name: "ceph-osd.target"
     state: "started"
     enabled: true
-  loop:
-    - { name: "ceph-osd.target" }
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
