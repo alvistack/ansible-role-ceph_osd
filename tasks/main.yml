@@ -150,10 +150,6 @@
   ignore_errors: true
   tags: ceph_osd
 
-- name: flush handlers
-  meta: flush_handlers
-  tags: ceph_osd
-
 - name: systemctl start ceph-osd.target
   service:
     name: "ceph-osd.target"
@@ -161,4 +157,8 @@
     enabled: true
   changed_when: false
   ignore_errors: true
+  tags: ceph_osd
+
+- name: flush handlers
+  meta: flush_handlers
   tags: ceph_osd
