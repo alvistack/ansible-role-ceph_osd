@@ -15,7 +15,11 @@
 # limitations under the License.
 
 _apt:
-  "15.2": []
+  "15.2":
+    - { state: "latest", name: "lvm2" }
+    - { state: "latest", name: "numactl" }
+    - { state: "latest", name: "parted" }
+    - { state: "latest", name: "ceph-osd" }
   "14.2":
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
