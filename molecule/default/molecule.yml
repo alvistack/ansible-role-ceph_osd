@@ -22,6 +22,12 @@ driver:
       ansible_connection: local
 platforms:
   - name: localhost
+    groups:
+      - ceph_mon
+      - ceph_mgr
+      - ceph_osd
+      - ceph_mds
+      - ceph_rgw
 lint: |
   set -ex
   yamllint .
