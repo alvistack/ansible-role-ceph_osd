@@ -64,7 +64,7 @@
         ceph osd pool application enable rbd rbd
       args:
         executable: "/bin/bash"
-      when: ansible_hostname == ansible_play_hosts[0]
+      when: inventory_hostname == ansible_play_hosts[0]
       changed_when: false
       ignore_errors: true
 
