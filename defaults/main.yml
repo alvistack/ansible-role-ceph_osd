@@ -17,7 +17,7 @@
 # Ceph version.
 ceph_release: "15.2"
 
-# Ceph osd configs.
+# Ceph Object Storage Daemon configs.
 ceph_osd_config:
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
   - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
@@ -38,6 +38,7 @@ ceph_osd_volume: >-
   {%- endfor -%}
   {{ _ns._params }}
 
+# Ceph OSD Pool to be created.
 ceph_osd_pool:
   - { name: "rbd", application: "rbd" }
   - { name: "cephfs_metadata", application: "cephfs" }
