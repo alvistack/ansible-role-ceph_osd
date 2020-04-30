@@ -138,7 +138,7 @@
     crush_device_class: "{{ item.crush_device_class | default(omit) }}"
     dmcrypt: "{{ item.dmcrypt | default(omit) }}"
     action: "create"
-  loop: "{{ ceph_volume }}"
+  loop: "{{ ceph_osd_volume }}"
   changed_when: false
   ignore_errors: true
   tags: ceph_osd
