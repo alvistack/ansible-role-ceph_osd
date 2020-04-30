@@ -32,30 +32,3 @@
       command: mount.ceph -h
       register: result
       changed_when: result is not succeeded
-
-- hosts: ceph_mon
-  remote_user: root
-  become: true
-  tasks:
-    - name: ceph --status
-      command: ceph --status
-      register: result
-      changed_when: result is not succeeded
-
-- hosts: ceph_mgr
-  remote_user: root
-  become: true
-  tasks:
-    - name: ceph --status
-      command: ceph --status
-      register: result
-      changed_when: result is not succeeded
-
-- hosts: ceph_osd
-  remote_user: root
-  become: true
-  tasks:
-    - name: ceph --status
-      command: ceph --status
-      register: result
-      changed_when: result is not succeeded
