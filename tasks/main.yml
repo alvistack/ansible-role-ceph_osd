@@ -162,3 +162,15 @@
 - name: flush handlers
   meta: flush_handlers
   tags: ceph_osd
+
+- name: ceph osd pool create
+  shell: |
+    set -o pipefail
+    ceph osd pool create {{ item.name }}
+    ceph osd pool application enable {{ item.name }} {{ item.application }}
+  args:
+    executable: "/bin/bash"
+  loop: "{{ ceph_osd_pool }}"
+  when: inventory_hostname == ansible_play_hosts[0]
+  changed_when: false
+  ignore_errors: true

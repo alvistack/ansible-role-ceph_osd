@@ -37,3 +37,8 @@ ceph_osd_volume: >-
   {%-   set _ns._params = _ns._params + [{ "objectstore": "bluestore", "data": "/dev/" + device }] -%}
   {%- endfor -%}
   {{ _ns._params }}
+
+ceph_osd_pool:
+  - { name: "rbd", application: "rbd" }
+  - { name: "cephfs_metadata", application: "cephfs" }
+  - { name: "cephfs_data", application: "cephfs" }
