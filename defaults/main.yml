@@ -17,7 +17,7 @@
 # Ceph version.
 ceph_release: "15.2"
 
-# Ceph osd configs.
+# Ceph Object Storage Daemon configs.
 ceph_osd_config:
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
   - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
@@ -25,4 +25,21 @@ ceph_osd_config:
   - { state: "present", section: "osd", option: "osd memory target", value: "1073741824" }
 
 # Devices to be used as OSDs.
-ceph_volume: []
+# Device discovery is based on the Ansible fact 'ansible_devices'
+# which reports all the devices on a system. If chosen, all the disks
+# found will be passed to ceph-volume lvm batch. You should not be worried on using
+# this option since ceph-volume has a built-in check which looks for empty devices.
+# Thus devices with existing partition tables will not be used.
+ceph_osd_volume: >-
+  {%- set _ns = namespace() -%}
+  {%- set _ns._params = [] -%}
+  {%- for device, value in ansible_devices.items() -%}
+  {%-   set _ns._params = _ns._params + [{ "objectstore": "bluestore", "data": "/dev/" + device }] -%}
+  {%- endfor -%}
+  {{ _ns._params }}
+
+# Ceph OSD Pool to be created.
+ceph_osd_pool:
+  - { name: "rbd", application: "rbd" }
+  - { name: "cephfs_metadata", application: "cephfs" }
+  - { name: "cephfs_data", application: "cephfs" }
