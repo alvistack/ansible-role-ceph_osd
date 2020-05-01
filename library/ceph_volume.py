@@ -654,7 +654,7 @@ def run_module():
             strategy_changed_in_out = "strategy changed" in out
             strategy_changed_in_err = "strategy changed" in err
             strategy_changed = strategy_changed_in_out or \
-                               strategy_changed_in_err
+                strategy_changed_in_err
             if strategy_changed:
                 if strategy_changed_in_out:
                     out = json.dumps({"changed": False,
