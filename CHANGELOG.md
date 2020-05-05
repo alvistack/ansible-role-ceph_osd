@@ -4,6 +4,7 @@
 
 ### Major Changes
 
+  - Support Fedora 30
   - Support Debian 10
   - Support OSD pool creation
   - Discovery device for OSD from `ansible_devices`
