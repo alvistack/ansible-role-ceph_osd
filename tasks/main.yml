@@ -174,3 +174,4 @@
   when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
   ignore_errors: true
+  tags: ceph_osd
