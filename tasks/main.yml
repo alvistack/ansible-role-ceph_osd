@@ -166,7 +166,7 @@
 - name: ceph osd pool create
   shell: |
     set -o pipefail
-    ceph osd pool create {{ item.name }}
+    ceph osd pool create {{ item.name }} 1
     ceph osd pool application enable {{ item.name }} {{ item.application }}
   args:
     executable: "/bin/bash"
@@ -174,3 +174,4 @@
   when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
   ignore_errors: true
+  tags: ceph_osd
