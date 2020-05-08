@@ -166,7 +166,7 @@
 - name: ceph osd pool create
   shell: |
     set -o pipefail
-    ceph osd pool create {{ item.name }} 8 8
+    ceph osd pool create {{ item.name }} 1
     ceph osd pool application enable {{ item.name }} {{ item.application }}
   args:
     executable: "/bin/bash"
