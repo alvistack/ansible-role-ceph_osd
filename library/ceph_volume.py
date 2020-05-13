@@ -598,7 +598,7 @@ def run_module():
         if out_dict:
             data = module.params['data']
             result['stdout'] = 'skipped, since {0} is already used for an osd'.format(  # noqa E501
-            data)
+                data)
             result['rc'] = 0
             module.exit_json(**result)
 
