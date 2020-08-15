@@ -79,6 +79,7 @@
     option: "{{ item.option | default(None) or omit }}"
     value: "{{ item.value | default(None) or omit }}"
     state: "{{ item.state | default('present') }}"
+    mode: "0644"
   loop: "{{ ceph_osd_config }}"
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
