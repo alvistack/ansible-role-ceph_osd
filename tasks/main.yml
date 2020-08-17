@@ -74,12 +74,12 @@
 
 - name: tweak settings in ini files
   ini_file:
-    path: "/etc/ceph/ceph.conf"
     section: "{{ item.section }}"
-    option: "{{ item.option | default(None) or omit }}"
-    value: "{{ item.value | default(None) or omit }}"
-    mode: "{{ item.mode | default('0644') }}"
-    state: "{{ item.state | default('present') }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state }}"
+    path: "/etc/ceph/ceph.conf"
+    mode: "0644"
   loop: "{{ ceph_osd_config }}"
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
