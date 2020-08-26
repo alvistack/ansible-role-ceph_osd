@@ -58,6 +58,7 @@
   loop:
     - { dest: "/etc/ceph" }
     - { dest: "/lib/systemd/system" }
+    - { dest: "/lib/systemd/system/ceph-osd.target.d" }
   tags: ceph_osd
 
 - name: touch files
