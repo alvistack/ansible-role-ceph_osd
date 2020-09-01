@@ -107,6 +107,7 @@
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0644') }}"
   loop:
+    - { dest: "/lib/systemd/system/ceph-osd.target" }
     - { dest: "/lib/systemd/system/ceph-osd@.service" }
   notify:
     - ceph_osd | systemctl daemon-reload
@@ -121,6 +122,7 @@
     mode: "{{ item.mode | default('0644') }}"
     state: "{{ item.state | default('file') }}"
   loop:
+    - { dest: "/lib/systemd/system/ceph-osd.target" }
     - { dest: "/lib/systemd/system/ceph-osd@.service" }
   notify:
     - ceph_osd | systemctl restart ceph-osd.target

@@ -2,8 +2,9 @@
 
 [Unit]
 Description=Ceph object storage daemon osd.%i
-After=network-online.target local-fs.target time-sync.target ceph-mon.target
-Wants=network-online.target local-fs.target time-sync.target ceph-mon.target
+After=network-online.target local-fs.target time-sync.target
+Wants=network-online.target local-fs.target time-sync.target
+RequiresMountsFor=/var/lib/ceph
 PartOf=ceph-osd.target
 
 [Service]
