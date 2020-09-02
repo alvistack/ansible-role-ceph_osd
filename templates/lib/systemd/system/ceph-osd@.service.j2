@@ -2,9 +2,11 @@
 
 [Unit]
 Description=Ceph object storage daemon osd.%i
-After=network-online.target local-fs.target time-sync.target ceph-mon.target
-Wants=network-online.target local-fs.target time-sync.target
 PartOf=ceph-osd.target
+After=network-online.target local-fs.target time-sync.target
+Before=ceph-osd.target
+Wants=network-online.target local-fs.target time-sync.target ceph-osd.target
+RequiresMountsFor=/var/lib/ceph
 
 [Service]
 LimitNOFILE=1048576
@@ -29,6 +31,7 @@ TasksMax=infinity
 Restart=on-failure
 StartLimitInterval=30min
 StartLimitBurst=3
+RestartSec=10
 
 [Install]
 WantedBy=ceph-osd.target
