@@ -4,6 +4,9 @@
 
 ### Major Changes
 
+  - Bugfix graceful shutdown deadlock due to systemd dependencies
+  - Auto adjust number of replicas for objects in the pool
+
 ## 4.5.0 - 2020-08-26
 
 ### Major Changes
