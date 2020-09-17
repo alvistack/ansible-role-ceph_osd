@@ -4,8 +4,8 @@
 Description=Ceph object storage daemon osd.%i
 PartOf=ceph-osd.target
 After=network-online.target local-fs.target time-sync.target
-Before=ceph-osd.target
-Wants=network-online.target local-fs.target time-sync.target ceph-osd.target
+Before=remote-fs-pre.target ceph-osd.target
+Wants=network-online.target local-fs.target time-sync.target remote-fs-pre.target ceph-osd.target
 RequiresMountsFor=/var/lib/ceph
 
 [Service]
