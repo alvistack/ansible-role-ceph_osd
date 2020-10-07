@@ -144,6 +144,9 @@
   changed_when: false
   ignore_errors: true
 
+- name: flush handlers
+  meta: flush_handlers
+
 - name: systemctl start ceph-osd.target
   service:
     name: "ceph-osd.target"
@@ -151,9 +154,6 @@
     enabled: true
   changed_when: false
   ignore_errors: true
-
-- name: flush handlers
-  meta: flush_handlers
 
 - name: ceph osd pool create
   shell: |
