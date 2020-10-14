@@ -16,7 +16,6 @@
 
 - name: include default variables
   include_vars: "../vars/main.yml"
-  tags: ceph_osd
 
 - name: include release specific variables
   include_vars: "{{ lookup('first_found', _params) }}"
@@ -31,7 +30,6 @@
       paths:
         - "../vars"
   ignore_errors: true
-  tags: ceph_osd
 
 - name: include release specific tasks
   include_tasks: "{{ lookup('first_found', _params) }}"
@@ -46,7 +44,6 @@
       paths:
         - "."
   ignore_errors: true
-  tags: ceph_osd
 
 - name: prepare directories
   file:
@@ -59,7 +56,6 @@
     - { dest: "/etc/ceph" }
     - { dest: "/lib/systemd/system" }
     - { dest: "/lib/systemd/system/ceph-osd.target.d" }
-  tags: ceph_osd
 
 - name: touch files
   copy:
@@ -71,7 +67,6 @@
     force: false
   loop:
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
-  tags: ceph_osd
 
 - name: tweak settings in ini files
   ini_file:
@@ -84,7 +79,6 @@
   loop: "{{ ceph_osd_config }}"
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
-  tags: ceph_osd
 
 - name: prepare files
   file:
@@ -97,7 +91,6 @@
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
-  tags: ceph_osd
 
 - name: copy templates
   template:
@@ -112,7 +105,6 @@
   notify:
     - ceph_osd | systemctl daemon-reload
     - ceph_osd | systemctl restart ceph-osd.target
-  tags: ceph_osd
 
 - name: prepare files
   file:
@@ -127,7 +119,6 @@
   notify:
     - ceph_osd | systemctl daemon-reload
     - ceph_osd | systemctl restart ceph-osd.target
-  tags: ceph_osd
 
 - name: ceph-volume lvm create
   ceph_volume:
@@ -146,14 +137,15 @@
   loop: "{{ ceph_osd_volume }}"
   changed_when: false
   ignore_errors: true
-  tags: ceph_osd
 
 - name: ceph-volume lvm activate
   ceph_volume:
     action: "activate"
   changed_when: false
   ignore_errors: true
-  tags: ceph_osd
+
+- name: flush handlers
+  meta: flush_handlers
 
 - name: systemctl start ceph-osd.target
   service:
@@ -162,11 +154,6 @@
     enabled: true
   changed_when: false
   ignore_errors: true
-  tags: ceph_osd
-
-- name: flush handlers
-  meta: flush_handlers
-  tags: ceph_osd
 
 - name: ceph osd pool create
   shell: |
@@ -181,4 +168,3 @@
   when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
   ignore_errors: true
-  tags: ceph_osd

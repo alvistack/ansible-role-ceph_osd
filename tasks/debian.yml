@@ -24,4 +24,3 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
-  tags: ceph_osd

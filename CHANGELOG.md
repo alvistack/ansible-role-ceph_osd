@@ -4,6 +4,7 @@
 
 ### Major Changes
 
+  - Remove redundant tags from tasks
   - Bugfix graceful shutdown deadlock due to systemd dependencies
   - Auto adjust number of replicas for objects in the pool
 
