@@ -20,7 +20,7 @@ driver:
     name: libvirt
 platforms:
   - name: ${MOLECULE_INSTANCE_NAME}-1
-    box: generic/opensuse15
+    box: generic/ubuntu2010
     cpu: 2
     memory: 4096
     interfaces:
@@ -30,15 +30,15 @@ platforms:
     provider_raw_config_args:
       - 'video_type = "virtio"'
       - 'nic_model_type = "virtio"'
-      - 'disk_bus = "sata"'
+      - 'disk_bus = "virtio"'
       - 'volume_cache = "none"'
-      - 'storage :file, bus: "sata", cache: "none"'
+      - 'storage :file, bus: "virtio", cache: "none"'
     groups:
       - ceph_mon
       - ceph_mgr
       - ceph_osd
   - name: ${MOLECULE_INSTANCE_NAME}-2
-    box: generic/opensuse15
+    box: generic/ubuntu2010
     cpu: 2
     memory: 4096
     interfaces:
@@ -48,9 +48,9 @@ platforms:
     provider_raw_config_args:
       - 'video_type = "virtio"'
       - 'nic_model_type = "virtio"'
-      - 'disk_bus = "sata"'
+      - 'disk_bus = "virtio"'
       - 'volume_cache = "none"'
-      - 'storage :file, bus: "sata", cache: "none"'
+      - 'storage :file, bus: "virtio", cache: "none"'
     groups:
       - ceph_mon
       - ceph_mds
