@@ -36,7 +36,7 @@
   tasks:
     - name: base64 encode
       shell: |
-        set -o pipefail
+        set -euo pipefail
         tar zcfP - {{ _params | join(' ') }} | base64 -w 0
       vars:
         _params:
@@ -51,7 +51,7 @@
 
     - name: base64 decode
       shell: |
-        set -o pipefail
+        set -euo pipefail
         echo -n {{ base64_encode_result.stdout | quote }} | base64 -d | tar zx -C /
       args:
         executable: "/bin/bash"
@@ -69,7 +69,7 @@
   tasks:
     - name: base64 encode
       shell: |
-        set -o pipefail
+        set -euo pipefail
         tar zcfP - {{ _params | join(' ') }} | base64 -w 0
       vars:
         _params:
@@ -84,7 +84,7 @@
 
     - name: base64 decode
       shell: |
-        set -o pipefail
+        set -euo pipefail
         echo -n {{ base64_encode_result.stdout | quote }} | base64 -d | tar zx -C /
       args:
         executable: "/bin/bash"
