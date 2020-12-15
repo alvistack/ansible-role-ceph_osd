@@ -158,9 +158,9 @@
 - name: ceph osd pool create
   shell: |
     set -euo pipefail
-    ceph osd pool create {{ item.name }} 1 || echo $?
-    ceph osd pool set {{ item.name }} min_size {{ item.min_size | default(ceph_osd_pool_default_min_size) }}
+    ceph osd pool create {{ item.name }}
     ceph osd pool set {{ item.name }} size {{ item.size | default(ceph_osd_pool_default_size) }}
+    ceph osd pool set {{ item.name }} min_size {{ item.min_size | default(ceph_osd_pool_default_min_size) }}
     ceph osd pool application enable {{ item.name }} {{ item.application }}
   args:
     executable: "/bin/bash"
