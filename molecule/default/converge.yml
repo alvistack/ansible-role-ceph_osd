@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
+- hosts: all
   remote_user: root
   become: true
   tasks:
@@ -22,7 +22,7 @@
         name: ceph_common
       tags: ceph_common
 
-- hosts: ceph_mon
+- hosts: all
   remote_user: root
   become: true
   tasks:
@@ -30,7 +30,7 @@
         name: ceph_mon
       tags: ceph_mon
 
-- hosts: ceph_mgr
+- hosts: all
   remote_user: root
   become: true
   tasks:
@@ -63,7 +63,7 @@
         name: ceph_mgr
       tags: ceph_mgr
 
-- hosts: ceph_osd
+- hosts: all
   remote_user: root
   become: true
   tasks:
