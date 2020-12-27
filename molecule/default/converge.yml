@@ -44,7 +44,7 @@
           - "/var/lib/ceph/bootstrap-mgr/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ ansible_play_hosts[0] }}"
+      delegate_to: "{{ groups['all'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
       tags: ceph_mgr
@@ -77,7 +77,7 @@
           - "/var/lib/ceph/bootstrap-osd/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ ansible_play_hosts[0] }}"
+      delegate_to: "{{ groups['all'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
       tags: ceph_osd
