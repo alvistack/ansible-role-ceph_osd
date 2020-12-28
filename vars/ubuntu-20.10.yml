@@ -20,4 +20,3 @@ _apt:
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
     - { state: "latest", name: "ceph-osd" }
-  "14.2": []

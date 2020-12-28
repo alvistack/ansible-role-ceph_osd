@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from ansible.module_utils.basic import AnsibleModule
+
 import datetime
 import copy
 import json
@@ -185,9 +187,6 @@ EXAMPLES = '''
     wal: /dev/sdc2
     action: create
 '''
-
-
-from ansible.module_utils.basic import AnsibleModule  # noqa 4502
 
 
 def fatal(message, module):
@@ -577,14 +576,14 @@ def run_module():
         changed=False,
         stdout='',
         stderr='',
-        rc='',
+        rc=0,
         start='',
         end='',
         delta='',
     )
 
     if module.check_mode:
-        return result
+        module.exit_json(**result)
 
     # start execution
     startd = datetime.datetime.now()
@@ -656,6 +655,8 @@ def run_module():
         if any(skip) or module.params.get('osd_fsid', None):
             rc, cmd, out, err = exec_command(
                 module, cmd)
+            for scan_cmd in ['vgscan', 'lvscan']:
+                module.run_command([scan_cmd, '--cache'])
         else:
             out = 'Skipped, nothing to zap'
             err = ''
@@ -691,6 +692,8 @@ def run_module():
         rc, cmd, out, err = exec_command(
             module, batch_report_cmd)
         try:
+            if not out:
+                out = '{}'
             report_result = json.loads(out)
         except ValueError:
             strategy_changed_in_out = "strategy changed" in out
@@ -735,10 +738,6 @@ def run_module():
                     module, batch(module, container_image))
         else:
             cmd = batch_report_cmd
-
-    else:
-        module.fail_json(
-            msg='State must either be "create" or "prepare" or "activate" or "list" or "zap" or "batch" or "inventory".', changed=False, rc=1)  # noqa E501
 
     endd = datetime.datetime.now()
     delta = endd - startd
