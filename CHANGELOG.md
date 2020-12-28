@@ -1,6 +1,10 @@
 # Ansible Role for Ceph Object Storage Daemon
 
-## 4.6.0 - TBC
+## 4.7.0 - TBC
+
+### Major Changes
+
+## 4.6.0 - 2020-12-28
 
 ### Major Changes
 
