@@ -156,14 +156,20 @@
   ignore_errors: true
 
 - name: ceph osd pool create
-  shell: |
-    set -euo pipefail
-    ceph osd pool create {{ item.name }}
-    ceph osd pool set {{ item.name }} size {{ item.size | default(ceph_osd_pool_default_size) }}
-    ceph osd pool set {{ item.name }} min_size {{ item.min_size | default(ceph_osd_pool_default_min_size) }}
-    ceph osd pool application enable {{ item.name }} {{ item.application }}
-  args:
-    executable: "/bin/bash"
+  ceph_pool:
+    name: "{{ item.name }}"
+    application: "{{ item.application }}"
+    size: "{{ item.size | default(ceph_osd_pool_default_size) }}"
+    min_size: "{{ item.min_size | default(ceph_osd_pool_default_min_size) }}"
+    pg_num: "{{ item.pg_num | default(omit) }}"
+    pgp_num: "{{ item.pgp_num | default(omit) }}"
+    pg_autoscale_mode: "{{ item.pg_autoscale_mode | default(omit) }}"
+    target_size_ratio: "{{ item.target_size_ratio | default(omit) }}"
+    pool_type: "{{ item.pool_type | default(omit) }}"
+    erasure_profile: "{{ item.erasure_profile | default(omit) }}"
+    rule_name: "{{ item.rule_name | default(omit) }}"
+    expected_num_objects: "{{ item.expected_num_objects | default(omit) }}"
+    state: "present"
   loop: "{{ ceph_osd_pool }}"
   when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
