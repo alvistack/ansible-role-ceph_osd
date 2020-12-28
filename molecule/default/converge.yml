@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: all
+- hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
   remote_user: root
   become: true
   tasks:
@@ -22,7 +22,7 @@
         name: ceph_common
       tags: ceph_common
 
-- hosts: all
+- hosts: ceph_mon
   remote_user: root
   become: true
   tasks:
@@ -30,7 +30,7 @@
         name: ceph_mon
       tags: ceph_mon
 
-- hosts: all
+- hosts: ceph_mgr
   remote_user: root
   become: true
   tasks:
@@ -44,7 +44,7 @@
           - "/var/lib/ceph/bootstrap-mgr/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ groups['all'][0] }}"
+      delegate_to: "{{ groups['ceph_mon'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
       tags: ceph_mgr
@@ -63,7 +63,7 @@
         name: ceph_mgr
       tags: ceph_mgr
 
-- hosts: all
+- hosts: ceph_osd
   remote_user: root
   become: true
   tasks:
@@ -77,7 +77,7 @@
           - "/var/lib/ceph/bootstrap-osd/ceph.keyring"
       args:
         executable: "/bin/bash"
-      delegate_to: "{{ groups['all'][0] }}"
+      delegate_to: "{{ groups['ceph_mon'][0] }}"
       register: base64_encode_result
       changed_when: base64_encode_result is not succeeded
       tags: ceph_osd
