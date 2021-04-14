@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Ceph version.
-ceph_release: "15.2"
+ceph_release: "16.2"
 
 # Sets the number of replicas for objects in the pool.
 ceph_osd_pool_default_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(3, 1) }}"

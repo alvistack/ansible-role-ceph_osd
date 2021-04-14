@@ -92,16 +92,20 @@
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
 
-- name: copy templates
-  template:
-    dest: "{{ item.dest }}"
-    src: "{{ item.src | default('./templates' + item.dest + '.j2') }}"
-    owner: "{{ item.owner | default('root') }}"
-    group: "{{ item.group | default('root') }}"
-    mode: "{{ item.mode | default('0644') }}"
+- name: tweak settings in ini files
+  ini_file:
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state }}"
+    path: "/lib/systemd/system/ceph-osd@.service"
+    no_extra_spaces: true
+    mode: "0644"
   loop:
-    - { dest: "/lib/systemd/system/ceph-osd.target" }
-    - { dest: "/lib/systemd/system/ceph-osd@.service" }
+    - { state: "present", section: "Service", option: "ProtectClock", value: "false" }
+    - { state: "present", section: "Service", option: "ProtectHostname", value: "false" }
+    - { state: "present", section: "Service", option: "ProtectKernelLogs", value: "false" }
+    - { state: "present", section: "Service", option: "RestrictSUIDSGID", value: "false" }
   notify:
     - ceph_osd | systemctl daemon-reload
     - ceph_osd | systemctl restart ceph-osd.target

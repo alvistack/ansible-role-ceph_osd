@@ -15,6 +15,7 @@
 # limitations under the License.
 
 _apt:
+  "16.2": []
   "15.2":
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
