@@ -29,7 +29,6 @@
         - "{{ ansible_os_family | lower }}.yml"
       paths:
         - "../vars"
-  ignore_errors: true
 
 - name: include release specific tasks
   include_tasks: "{{ lookup('first_found', _params) }}"
@@ -43,7 +42,6 @@
         - "{{ ansible_os_family | lower }}.yml"
       paths:
         - "."
-  ignore_errors: true
 
 - name: prepare directories
   file:
@@ -140,13 +138,13 @@
     action: "create"
   loop: "{{ ceph_osd_volume }}"
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
 - name: ceph-volume lvm activate
   ceph_volume:
     action: "activate"
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
 - name: flush handlers
   meta: flush_handlers
@@ -157,7 +155,7 @@
     state: "started"
     enabled: true
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
 - name: ceph osd pool create
   ceph_pool:
@@ -177,4 +175,4 @@
   loop: "{{ ceph_osd_pool }}"
   when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
-  ignore_errors: true
+  failed_when: false
