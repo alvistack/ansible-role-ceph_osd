@@ -9,7 +9,7 @@ Ansible Role for Ceph Object Storage Daemon Installation.
 
 ## Requirements
 
-This role require Ansible 2.10 or higher.
+This role require Ansible 4.0 or higher.
 
 This role was designed for:
 
