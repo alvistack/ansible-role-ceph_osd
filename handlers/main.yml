@@ -14,12 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: ceph_osd | systemctl daemon-reload
-  systemd:
-    daemon_reload: true
-  changed_when: false
-  failed_when: false
-
 - name: ceph_osd | systemctl restart ceph-osd.target
   service:
     name: "ceph-osd.target"

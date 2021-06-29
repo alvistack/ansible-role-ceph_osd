@@ -62,8 +62,6 @@
     state: "{{ item.state | default('directory') }}"
   loop:
     - { dest: "/etc/ceph" }
-    - { dest: "/lib/systemd/system" }
-    - { dest: "/lib/systemd/system/ceph-osd.target.d" }
     - { dest: "/var/lib/ceph/osd", owner: "ceph", group: "ceph" }
 
 - name: base64 encode
@@ -122,38 +120,6 @@
   loop:
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
   notify:
-    - ceph_osd | systemctl restart ceph-osd.target
-
-- name: tweak settings in ini files
-  ini_file:
-    section: "{{ item.section }}"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    state: "{{ item.state }}"
-    path: "/lib/systemd/system/ceph-osd@.service"
-    no_extra_spaces: true
-    mode: "0644"
-  loop:
-    - { state: "present", section: "Service", option: "ProtectClock", value: "false" }
-    - { state: "present", section: "Service", option: "ProtectHostname", value: "false" }
-    - { state: "present", section: "Service", option: "ProtectKernelLogs", value: "false" }
-    - { state: "present", section: "Service", option: "RestrictSUIDSGID", value: "false" }
-  notify:
-    - ceph_osd | systemctl daemon-reload
-    - ceph_osd | systemctl restart ceph-osd.target
-
-- name: prepare files
-  file:
-    dest: "{{ item.dest }}"
-    owner: "{{ item.owner | default('root') }}"
-    group: "{{ item.group | default('root') }}"
-    mode: "{{ item.mode | default('0644') }}"
-    state: "{{ item.state | default('file') }}"
-  loop:
-    - { dest: "/lib/systemd/system/ceph-osd.target" }
-    - { dest: "/lib/systemd/system/ceph-osd@.service" }
-  notify:
-    - ceph_osd | systemctl daemon-reload
     - ceph_osd | systemctl restart ceph-osd.target
 
 - name: ceph-volume lvm create
