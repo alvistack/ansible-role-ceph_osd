@@ -27,7 +27,8 @@ ceph_osd_pool_default_min_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary
 # Ceph Object Storage Daemon configs.
 ceph_osd_config:
   - { state: "present", section: "osd", option: "bluefs buffered io", value: "true" }
-  - { state: "present", section: "osd", option: "bluefs cache autotune", value: "true" }
+  - { state: "present", section: "osd", option: "bluestore cache autotune", value: "true" }
+  - { state: "present", section: "osd", option: "bluestore cache size", value: "536870912" }
   - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
   - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
