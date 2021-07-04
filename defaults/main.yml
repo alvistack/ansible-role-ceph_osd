@@ -28,12 +28,12 @@ ceph_osd_pool_default_min_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary
 ceph_osd_config:
   - { state: "present", section: "osd", option: "bluefs buffered io", value: "true" }
   - { state: "present", section: "osd", option: "bluestore cache autotune", value: "false" }
-  - { state: "present", section: "osd", option: "bluestore cache size", value: "268435456" }
+  - { state: "present", section: "osd", option: "bluestore cache size", value: "134217728" }
   - { state: "present", section: "osd", option: "osd disk threads", value: "2" }
   - { state: "present", section: "osd", option: "osd map cache size", value: "256" }
   - { state: "present", section: "osd", option: "osd max write size", value: "512" }
   - { state: "present", section: "osd", option: "osd memory target autotune", value: "false" }
-  - { state: "present", section: "osd", option: "osd memory target", value: "268435456" }
+  - { state: "present", section: "osd", option: "osd memory target", value: "134217728" }
 
 # Devices to be used as OSDs.
 # Device discovery is based on the Ansible fact 'ansible_devices'
