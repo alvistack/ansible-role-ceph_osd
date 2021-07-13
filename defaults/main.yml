@@ -30,10 +30,10 @@ ceph_osd_config:
   - { state: "present", section: "osd", option: "bluestore_cache_autotune", value: "false" }
   - { state: "present", section: "osd", option: "bluestore_cache_kv_ratio", value: "0.2" }
   - { state: "present", section: "osd", option: "bluestore_cache_meta_ratio", value: "0.2" }
-  - { state: "present", section: "osd", option: "bluestore_cache_size", value: "134217728" }
+  - { state: "present", section: "osd", option: "bluestore_cache_size", value: "268435456" }
   - { state: "present", section: "osd", option: "osd_disk_threads", value: "2" }
-  - { state: "present", section: "osd", option: "osd_memory_base", value: "100663296" }
-  - { state: "present", section: "osd", option: "osd_memory_target", value: "536870912" }
+  - { state: "present", section: "osd", option: "osd_memory_base", value: "201326592" }
+  - { state: "present", section: "osd", option: "osd_memory_target", value: "1073741824" }
   - { state: "present", section: "osd", option: "osd_memory_target_autotune", value: "false" }
 
 # Devices to be used as OSDs.
