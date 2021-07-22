@@ -4,6 +4,8 @@
 
 ### Major Changes
 
+  - Predefine `ceph_release` with latest available per distribution
+
 ## 5.1.0 - 2021-07-18
 
 ### Major Changes
