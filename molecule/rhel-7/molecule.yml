@@ -31,10 +31,6 @@ platforms:
       - "storage :file, bus: 'virtio', cache: 'writeback'"
     groups:
       - ceph_mon
-      - ceph_mgr
-      - ceph_osd
-      - ceph_mds
-      - ceph_rgw
   - name: ${MOLECULE_INSTANCE_NAME}-2
     box: alvistack/rhel-7
     cpu: 2
@@ -46,11 +42,8 @@ platforms:
       - "disk_driver :cache => 'writeback'"
       - "storage :file, bus: 'virtio', cache: 'writeback'"
     groups:
-      - ceph_mon
       - ceph_mgr
       - ceph_osd
-      - ceph_mds
-      - ceph_rgw
 lint: |
   set -euxo pipefail
   yamllint .
