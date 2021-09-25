@@ -87,19 +87,6 @@
   register: base64_decode_result
   changed_when: base64_decode_result is not succeeded
 
-- name: symlink files
-  file:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    force: "{{ item.force | default(true) }}"
-    mode: "{{ item.mode | default('0644') }}"
-    state: "{{ item.state | default('link') }}"
-    follow: false
-  loop:
-    - src: "/var/lib/ceph/bootstrap-osd/ceph.keyring"
-      dest: "/etc/ceph/ceph.client.bootstrap-osd.keyring"
-      mode: "0400"
-
 - name: touch files
   copy:
     dest: "{{ item.dest }}"
