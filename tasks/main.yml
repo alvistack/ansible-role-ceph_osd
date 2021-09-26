@@ -133,6 +133,17 @@
   changed_when: false
   failed_when: false
 
+- name: ceph osd pool set autoscale-profile
+  shell: |
+    set -euxo pipefail
+    ceph osd pool set autoscale-profile {{ ceph_osd_pool_autoscale_profile }}
+  args:
+    executable: "/bin/bash"
+  when: inventory_hostname == ansible_play_hosts[0]
+  delegate_to: "{{ ansible_play_hosts[0] }}"
+  register: result
+  changed_when: result is not succeeded
+
 - name: ceph osd pool create
   ceph_pool:
     name: "{{ item.name }}"

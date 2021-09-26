@@ -24,6 +24,9 @@ ceph_osd_pool_default_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(3, 
 # to acknowledge a write operation to the client.
 ceph_osd_pool_default_min_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(2, 1) }}"
 
+# Ceph OSD Pool autoscaler profile.
+ceph_osd_pool_autoscale_profile: "scale-up"
+
 # Ceph Object Storage Daemon configs.
 ceph_osd_config:
   - { state: "present", section: "osd", option: "bluefs_buffered_io", value: "true" }
