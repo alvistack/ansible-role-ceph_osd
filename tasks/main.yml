@@ -141,8 +141,8 @@
     executable: "/bin/bash"
   when: inventory_hostname == ansible_play_hosts[0]
   delegate_to: "{{ ansible_play_hosts[0] }}"
-  register: result
-  changed_when: result is not succeeded
+  changed_when: false
+  failed_when: false
 
 - name: ceph osd pool create
   ceph_pool:
