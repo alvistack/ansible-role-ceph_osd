@@ -122,6 +122,50 @@
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
 
+- name: flush handlers
+  meta: flush_handlers
+
+- name: systemctl start ceph-osd.target
+  service:
+    name: "ceph-osd.target"
+    state: "started"
+    enabled: true
+  changed_when: false
+  failed_when: false
+
+- name: ceph osd pool set autoscale-profile
+  shell: |
+    set -euxo pipefail
+    ceph osd pool set autoscale-profile {{ ceph_osd_pool_autoscale_profile }}
+  args:
+    executable: "/bin/bash"
+  when: inventory_hostname == ansible_play_hosts[0]
+  delegate_to: "{{ ansible_play_hosts[0] }}"
+  changed_when: false
+  failed_when: false
+
+- name: ceph osd pool create
+  ceph_pool:
+    name: "{{ item.name }}"
+    application: "{{ item.application }}"
+    size: "{{ item.size | default(ceph_osd_pool_default_size) }}"
+    min_size: "{{ item.min_size | default(ceph_osd_pool_default_min_size) }}"
+    pg_num: "{{ item.pg_num | default('8') }}"
+    pgp_num: "{{ item.pgp_num | default('8') }}"
+    pg_autoscale_mode: "{{ item.pg_autoscale_mode | default('on') }}"
+    pg_num_min: "{{ item.pg_num_min | default('8') }}"
+    target_size_ratio: "{{ item.target_size_ratio | default('1.0') }}"
+    pg_autoscale_bias: "{{ item.pg_autoscale_bias | default('1.0') }}"
+    pool_type: "{{ item.pool_type | default(omit) }}"
+    erasure_profile: "{{ item.erasure_profile | default(omit) }}"
+    rule_name: "{{ item.rule_name | default(omit) }}"
+    expected_num_objects: "{{ item.expected_num_objects | default(omit) }}"
+    state: "present"
+  loop: "{{ ceph_osd_pool }}"
+  when: inventory_hostname == ansible_play_hosts[0]
+  changed_when: false
+  failed_when: false
+
 - name: ceph-volume lvm create
   ceph_volume:
     data: "{{ item.data }}"
@@ -143,36 +187,5 @@
 - name: ceph-volume lvm activate
   ceph_volume:
     action: "activate"
-  changed_when: false
-  failed_when: false
-
-- name: flush handlers
-  meta: flush_handlers
-
-- name: systemctl start ceph-osd.target
-  service:
-    name: "ceph-osd.target"
-    state: "started"
-    enabled: true
-  changed_when: false
-  failed_when: false
-
-- name: ceph osd pool create
-  ceph_pool:
-    name: "{{ item.name }}"
-    application: "{{ item.application }}"
-    size: "{{ item.size | default(ceph_osd_pool_default_size) }}"
-    min_size: "{{ item.min_size | default(ceph_osd_pool_default_min_size) }}"
-    pg_num: "{{ item.pg_num | default(omit) }}"
-    pgp_num: "{{ item.pgp_num | default(omit) }}"
-    pg_autoscale_mode: "{{ item.pg_autoscale_mode | default(omit) }}"
-    target_size_ratio: "{{ item.target_size_ratio | default(omit) }}"
-    pool_type: "{{ item.pool_type | default(omit) }}"
-    erasure_profile: "{{ item.erasure_profile | default(omit) }}"
-    rule_name: "{{ item.rule_name | default(omit) }}"
-    expected_num_objects: "{{ item.expected_num_objects | default(omit) }}"
-    state: "present"
-  loop: "{{ ceph_osd_pool }}"
-  when: inventory_hostname == ansible_play_hosts[0]
   changed_when: false
   failed_when: false
