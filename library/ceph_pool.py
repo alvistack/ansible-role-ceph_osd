@@ -520,10 +520,6 @@ def create_pool(cluster,
             args.extend(['--pg_num_min',
                          user_pool_config['pg_num_min']['value']])
 
-        if user_pool_config['target_size_ratio']['value']:
-            args.extend(['--target_size_ratio',
-                         user_pool_config['target_size_ratio']['value']])
-
     if user_pool_config['type']['value'] == 'replicated':
         args.extend([user_pool_config['crush_rule']['value'],
                      '--expected_num_objects',
