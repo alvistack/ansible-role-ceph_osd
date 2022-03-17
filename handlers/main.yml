@@ -15,7 +15,7 @@
 # limitations under the License.
 
 - name: ceph_osd | systemctl restart ceph-osd.target
-  service:
+  ansible.builtin.service:
     name: "ceph-osd.target"
     state: "restarted"
     enabled: true
