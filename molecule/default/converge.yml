@@ -19,12 +19,12 @@
   become: true
   tasks:
     - name: include role
-      include_role:
+      ansible.builtin.include_role:
         name: chrony
       tags: chrony
 
     - name: include role
-      include_role:
+      ansible.builtin.include_role:
         name: ceph_common
       tags: ceph_common
 
@@ -33,7 +33,7 @@
   become: true
   tasks:
     - name: include role
-      include_role:
+      ansible.builtin.include_role:
         name: ceph_mon
       tags: ceph_mon
 
@@ -42,7 +42,7 @@
   become: true
   tasks:
     - name: include role
-      include_role:
+      ansible.builtin.include_role:
         name: ceph_mgr
       tags: ceph_mgr
 
@@ -51,6 +51,6 @@
   become: true
   tasks:
     - name: include role
-      include_role:
+      ansible.builtin.include_role:
         name: ceph_osd
       tags: ceph_osd
