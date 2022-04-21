@@ -14,9 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_ceph_release: "16.2"
+_ceph_release: "17.2"
 
 _zypper:
+  "17.2":
+    - { state: "latest", name: "lvm2" }
+    - { state: "latest", name: "numactl" }
+    - { state: "latest", name: "parted" }
+    - { state: "latest", name: "ceph-osd" }
+    - { state: "latest", name: "ceph-volume" }
   "16.2":
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
