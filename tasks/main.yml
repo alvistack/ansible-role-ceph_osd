@@ -133,16 +133,16 @@
   changed_when: false
   failed_when: false
 
-#- name: ceph osd pool set autoscale-profile
-#  ansible.builtin.shell: |
-#    set -euxo pipefail
-#    ceph osd pool set autoscale-profile {{ ceph_osd_pool_autoscale_profile }}
-#  args:
-#    executable: "/bin/bash"
-#  when: inventory_hostname == ansible_play_hosts[0]
-#  delegate_to: "{{ ansible_play_hosts[0] }}"
-#  changed_when: false
-#  failed_when: false
+- name: ceph osd pool set autoscale-profile
+  ansible.builtin.shell: |
+    set -euxo pipefail
+    ceph osd pool set autoscale-profile {{ ceph_osd_pool_autoscale_profile }}
+  args:
+    executable: "/bin/bash"
+  when: inventory_hostname == ansible_play_hosts[0]
+  delegate_to: "{{ ansible_play_hosts[0] }}"
+  changed_when: false
+  failed_when: false
 
 - name: ceph osd pool create
   ceph_pool:
@@ -154,7 +154,7 @@
     pgp_num: "{{ item.pgp_num | default('8') }}"
     pg_autoscale_mode: "{{ item.pg_autoscale_mode | default('on') }}"
     pg_num_min: "{{ item.pg_num_min | default('8') }}"
-    target_size_ratio: "{{ item.target_size_ratio | default('1.0') }}"
+    target_size_ratio: "{{ item.target_size_ratio | default('0.1') }}"
     pg_autoscale_bias: "{{ item.pg_autoscale_bias | default('1.0') }}"
     pool_type: "{{ item.pool_type | default(omit) }}"
     erasure_profile: "{{ item.erasure_profile | default(omit) }}"

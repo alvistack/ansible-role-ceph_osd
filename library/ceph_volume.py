@@ -6,6 +6,7 @@ import datetime
 import copy
 import json
 import os
+import re
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.0',
@@ -54,6 +55,10 @@ options:
     osd_fsid:
         description:
             - The OSD FSID
+        required: false
+    osd_id:
+        description:
+            - The OSD ID
         required: false
     journal:
         description:
@@ -214,17 +219,16 @@ def container_exec(binary, container_image, interactive=False):
 
     container_binary = os.getenv('CEPH_CONTAINER_BINARY')
     command_exec = [container_binary, 'run']
+
     if interactive:
         command_exec.extend(['--interactive'])
 
-        command_exec.extend([
-                '--rm',
-                '--net=host',
-                '-v', '/etc/ceph:/etc/ceph:z',
-                '-v', '/var/lib/ceph/:/var/lib/ceph/:z',
-                '-v', '/var/log/ceph/:/var/log/ceph/:z',
-                '--entrypoint=' + binary, container_image
-        ])
+    command_exec.extend(['--rm',
+                         '--net=host',
+                         '-v', '/etc/ceph:/etc/ceph:z',
+                         '-v', '/var/lib/ceph/:/var/lib/ceph/:z',
+                         '-v', '/var/log/ceph/:/var/log/ceph/:z',
+                         '--entrypoint=' + binary, container_image])
     return command_exec
 
 
@@ -266,7 +270,7 @@ def exec_command(module, cmd, stdin=None):
     return rc, cmd, out, err
 
 
-def exit_module(module, out, rc, cmd, err, startd, changed=False):
+def exit_module(module, out, rc, cmd, err, startd, changed=False, diff=dict(before="", after="")):  # noqa: E501
     endd = datetime.datetime.now()
     delta = endd - startd
 
@@ -279,6 +283,7 @@ def exit_module(module, out, rc, cmd, err, startd, changed=False):
         stdout=out.rstrip("\r\n"),
         stderr=err.rstrip("\r\n"),
         changed=changed,
+        diff=diff
     )
     module.exit_json(**result)
 
@@ -563,6 +568,7 @@ def zap_devices(module, container_image):
     wal = module.params.get('wal', None)
     wal_vg = module.params.get('wal_vg', None)
     osd_fsid = module.params.get('osd_fsid', None)
+    osd_id = module.params.get('osd_id', None)
     destroy = module.params.get('destroy', True)
 
     # build the CLI
@@ -573,6 +579,9 @@ def zap_devices(module, container_image):
 
     if osd_fsid:
         cmd.extend(['--osd-fsid', osd_fsid])
+
+    if osd_id:
+        cmd.extend(['--osd-id', osd_id])
 
     if data:
         data = get_data(data, data_vg)
@@ -620,12 +629,19 @@ def run_module():
         wal_devices=dict(type='list', required=False, default=[]),
         report=dict(type='bool', required=False, default=False),
         osd_fsid=dict(type='str', required=False),
+        osd_id=dict(type='str', required=False),
         destroy=dict(type='bool', required=False, default=True),
     )
 
     module = AnsibleModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
+        mutually_exclusive=[
+            ('data', 'osd_fsid', 'osd_id'),
+        ],
+        required_if=[
+            ('action', 'zap', ('data', 'osd_fsid', 'osd_id'), True)
+        ]
     )
 
     result = dict(
@@ -679,6 +695,7 @@ def run_module():
         # Prepare or create the OSD
         rc, cmd, out, err = exec_command(
             module, prepare_or_create_osd(module, action, container_image))
+        err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
 
     elif action == 'activate':
         if container_image:
@@ -708,7 +725,8 @@ def run_module():
 
         cmd = zap_devices(module, container_image)
 
-        if any(skip) or module.params.get('osd_fsid', None):
+        if any(skip) or module.params.get('osd_fsid', None) \
+                or module.params.get('osd_id', None):
             rc, cmd, out, err = exec_command(
                 module, cmd)
             for scan_cmd in ['vgscan', 'lvscan']:
@@ -787,11 +805,13 @@ def run_module():
                     # Batch prepare the OSD
                     rc, cmd, out, err = exec_command(
                         module, batch(module, container_image))
+                    err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
             else:
                 # we have the refactored batch, its idempotent so lets just
                 # run it
                 rc, cmd, out, err = exec_command(
                     module, batch(module, container_image))
+                err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
         else:
             cmd = batch_report_cmd
 

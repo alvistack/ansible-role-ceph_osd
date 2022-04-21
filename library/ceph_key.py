@@ -233,17 +233,16 @@ def container_exec(binary, container_image, interactive=False):
 
     container_binary = os.getenv('CEPH_CONTAINER_BINARY')
     command_exec = [container_binary, 'run']
+
     if interactive:
         command_exec.extend(['--interactive'])
 
-        command_exec.extend([
-                '--rm',
-                '--net=host',
-                '-v', '/etc/ceph:/etc/ceph:z',
-                '-v', '/var/lib/ceph/:/var/lib/ceph/:z',
-                '-v', '/var/log/ceph/:/var/log/ceph/:z',
-                '--entrypoint=' + binary, container_image
-        ])
+    command_exec.extend(['--rm',
+                         '--net=host',
+                         '-v', '/etc/ceph:/etc/ceph:z',
+                         '-v', '/var/lib/ceph/:/var/lib/ceph/:z',
+                         '-v', '/var/log/ceph/:/var/log/ceph/:z',
+                         '--entrypoint=' + binary, container_image])
     return command_exec
 
 
@@ -285,7 +284,7 @@ def exec_command(module, cmd, stdin=None):
     return rc, cmd, out, err
 
 
-def exit_module(module, out, rc, cmd, err, startd, changed=False):
+def exit_module(module, out, rc, cmd, err, startd, changed=False, diff=dict(before="", after="")):  # noqa: E501
     endd = datetime.datetime.now()
     delta = endd - startd
 
@@ -298,6 +297,7 @@ def exit_module(module, out, rc, cmd, err, startd, changed=False):
         stdout=out.rstrip("\r\n"),
         stderr=err.rstrip("\r\n"),
         changed=changed,
+        diff=diff
     )
     module.exit_json(**result)
 
