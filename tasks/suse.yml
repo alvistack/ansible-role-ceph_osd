@@ -14,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+- name: zypper removelock
+  ansible.builtin.command: zypper removelock {{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\..*$', '\1-*') }}
+  loop: "{{ _zypper[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false
+
 - name: zypper install
   vars:
     ansible_python_interpreter: "python3"
@@ -26,3 +33,10 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+
+- name: zypper addlock
+  ansible.builtin.command: zypper addlock {{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\..*$', '\1-*') }}
+  loop: "{{ _zypper[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false

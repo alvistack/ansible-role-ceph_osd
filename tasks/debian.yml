@@ -14,13 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+- name: apt-mark unhold
+  ansible.builtin.dpkg_selections:
+    name: "{{ item.name | regex_replace('^(.*)=[0-9]*:*[0-9]+\\..*$', '\\1') }}"
+    selection: "install"
+  loop: "{{ _apt[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false
+
 - name: apt-get install
   ansible.builtin.apt:
-    name: "{{ item.name }}"
     state: "{{ item.state }}"
+    name: "{{ item.name | default(None) or omit }}"
+    deb: "{{ item.deb | default(None) or omit }}"
     install_recommends: false
   loop: "{{ _apt[ceph_release] }}"
   register: result
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+
+- name: apt-mark hold
+  ansible.builtin.dpkg_selections:
+    name: "{{ item.name | regex_replace('^(.*)=[0-9]*:*[0-9]+\\..*$', '\\1') }}"
+    selection: "hold"
+  loop: "{{ _apt[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false

@@ -14,8 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Ceph version.
+# Ceph release.
 ceph_release: "{{ _ceph_release }}"
+
+# Ceph version.
+ceph_version: "{{ _ceph_version[ceph_release] }}"
 
 # Sets the number of replicas for objects in the pool.
 ceph_osd_pool_default_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(3, 1) }}"

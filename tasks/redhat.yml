@@ -14,6 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+- name: yum versionlock delete
+  community.general.yum_versionlock:
+    name: "{{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\\..*$', '\\1-*') }}"
+    state: "absent"
+  loop: "{{ _yum[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false
+
 - name: yum install
   ansible.builtin.yum:
     name: "{{ item.name }}"
@@ -23,3 +32,12 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+
+- name: yum versionlock add
+  community.general.yum_versionlock:
+    name: "{{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\\..*$', '\\1-*') }}"
+    state: "present"
+  loop: "{{ _yum[ceph_release] }}"
+  when: item.state == "present"
+  changed_when: false
+  failed_when: false

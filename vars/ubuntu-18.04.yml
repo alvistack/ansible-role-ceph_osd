@@ -22,9 +22,9 @@ _apt:
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
-    - { state: "latest", name: "ceph-osd" }
+    - { state: "present", name: "ceph-osd={{ ceph_version }}*" }
   "15.2":
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
-    - { state: "latest", name: "ceph-osd" }
+    - { state: "present", name: "ceph-osd={{ ceph_version }}*" }
