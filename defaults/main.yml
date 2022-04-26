@@ -67,4 +67,4 @@ ceph_osd_pool:
   - { name: ".rgw.root", application: "rgw" }
   - { name: "default.rgw.log", application: "rgw" }
   - { name: "default.rgw.control", application: "rgw" }
-  - { name: "default.rgw.meta", application: "rgw", pg_autoscale_bias: "0.4" }
+  - { name: "default.rgw.meta", application: "rgw", pg_autoscale_bias: "4.0" }
