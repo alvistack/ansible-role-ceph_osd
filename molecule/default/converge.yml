@@ -20,13 +20,13 @@
   tasks:
     - name: include role
       ansible.builtin.include_role:
-        name: chrony
-      tags: chrony
+        name: alvistack.chrony
+      tags: alvistack.chrony
 
     - name: include role
       ansible.builtin.include_role:
-        name: ceph_common
-      tags: ceph_common
+        name: alvistack.ceph_common
+      tags: alvistack.ceph_common
 
 - hosts: ceph_mon
   remote_user: root
@@ -34,8 +34,8 @@
   tasks:
     - name: include role
       ansible.builtin.include_role:
-        name: ceph_mon
-      tags: ceph_mon
+        name: alvistack.ceph_mon
+      tags: alvistack.ceph_mon
 
 - hosts: ceph_mgr
   remote_user: root
@@ -43,8 +43,8 @@
   tasks:
     - name: include role
       ansible.builtin.include_role:
-        name: ceph_mgr
-      tags: ceph_mgr
+        name: alvistack.ceph_mgr
+      tags: alvistack.ceph_mgr
 
 - hosts: ceph_osd
   remote_user: root
@@ -52,5 +52,5 @@
   tasks:
     - name: include role
       ansible.builtin.include_role:
-        name: ceph_osd
-      tags: ceph_osd
+        name: alvistack.ceph_osd
+      tags: alvistack.ceph_osd

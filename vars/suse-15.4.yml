@@ -21,7 +21,7 @@ _zypper:
     - { state: "latest", name: "lvm2" }
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
-    - { state: "latest", name: "ceph-osd" }
-    - { state: "latest", name: "ceph-volume" }
+    - { state: "present", name: "ceph-osd-{{ ceph_version }}" }
+    - { state: "present", name: "ceph-volume-{{ ceph_version }}" }
   "16.2": []
   "15.2": []
