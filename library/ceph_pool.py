@@ -723,40 +723,8 @@ def run_module():
                                                           user,
                                                           user_key,
                                                           container_image=container_image))  # noqa: E501
-        if rc == 0:
-            running_pool_details = get_pool_details(module,
-                                                    cluster,
-                                                    name,
-                                                    user,
-                                                    user_key,
-                                                    container_image=container_image)  # noqa: E501
-            user_pool_config['pg_placement_num'] = {'value': str(running_pool_details[2]['pg_placement_num']), 'cli_set_opt': 'pgp_num'}  # noqa: E501
-            delta = compare_pool_config(user_pool_config,
-                                        running_pool_details[2])
-            if len(delta) > 0:
-                keys = list(delta.keys())
-                details = running_pool_details[2]
-                if details['erasure_code_profile'] and 'size' in keys:
-                    del delta['size']
-                if details['pg_autoscale_mode'] == 'on':
-                    delta.pop('pg_num', None)
-                    delta.pop('pgp_num', None)
 
-                if len(delta) == 0:
-                    out = "Skipping pool {}.\nUpdating either 'size' on an erasure-coded pool or 'pg_num'/'pgp_num' on a pg autoscaled pool is incompatible".format(name)  # noqa: E501
-                else:
-                    rc, cmd, out, err = update_pool(module,
-                                                    cluster,
-                                                    name,
-                                                    user,
-                                                    user_key,
-                                                    delta,
-                                                    container_image=container_image)  # noqa: E501
-                    if rc == 0:
-                        changed = True
-            else:
-                out = "Pool {} already exists and there is nothing to update.".format(name)  # noqa: E501
-        else:
+        if rc != 0:
             rc, cmd, out, err = exec_command(module,
                                              create_pool(cluster,
                                                          name,
@@ -776,6 +744,39 @@ def run_module():
                 # not implemented yet
                 pass
             changed = True
+
+        running_pool_details = get_pool_details(module,
+                                                cluster,
+                                                name,
+                                                user,
+                                                user_key,
+                                                container_image=container_image)  # noqa: E501
+        user_pool_config['pg_placement_num'] = {'value': str(running_pool_details[2]['pg_placement_num']), 'cli_set_opt': 'pgp_num'}  # noqa: E501
+        delta = compare_pool_config(user_pool_config,
+                                    running_pool_details[2])
+        if len(delta) > 0:
+            keys = list(delta.keys())
+            details = running_pool_details[2]
+            if details['erasure_code_profile'] and 'size' in keys:
+                del delta['size']
+            if details['pg_autoscale_mode'] == 'on':
+                delta.pop('pg_num', None)
+                delta.pop('pgp_num', None)
+
+            if len(delta) == 0:
+                out = "Skipping pool {}.\nUpdating either 'size' on an erasure-coded pool or 'pg_num'/'pgp_num' on a pg autoscaled pool is incompatible".format(name)  # noqa: E501
+            else:
+                rc, cmd, out, err = update_pool(module,
+                                                cluster,
+                                                name,
+                                                user,
+                                                user_key,
+                                                delta,
+                                                container_image=container_image)  # noqa: E501
+                if rc == 0:
+                    changed = True
+        else:
+            out = "Pool {} already exists and there is nothing to update.".format(name)  # noqa: E501
 
     elif state == "list":
         rc, cmd, out, err = exec_command(module,
