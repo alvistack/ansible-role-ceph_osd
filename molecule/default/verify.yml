@@ -14,16 +14,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: all
+- hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
   remote_user: root
   become: true
   tasks:
-    - name: ansible --version
-      ansible.builtin.command: ansible --version
+    - name: ceph --version
+      ansible.builtin.command: ceph --version
       register: result
       changed_when: result is not succeeded
 
-    - name: ansible-lint --version
-      ansible.builtin.command: ansible-lint --version
+    - name: rbd --version
+      ansible.builtin.command: rbd --version
       register: result
       changed_when: result is not succeeded
+
+    - name: mount.ceph -h
+      ansible.builtin.command: mount.ceph -h
+      register: result
+      changed_when: result is not succeeded
+
+    - name: ceph health detail
+      ansible.builtin.shell: |
+        set -euxo pipefail
+        ceph health detail | grep 'HEALTH_OK'
+      args:
+        executable: "/bin/bash"
+      loop: "{{ ansible_play_hosts }}"
+      delegate_to: "{{ item }}"
+      run_once: true
+      register: result
+      changed_when: result is not succeeded
+      until: result is succeeded
+      retries: 60
