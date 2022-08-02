@@ -296,7 +296,7 @@ def fatal(message, module):
     if module:
         module.fail_json(msg=message, rc=1)
     else:
-        raise(Exception(message))
+        raise (Exception(message))
 
 
 def build_cmd(action, container_image, cluster='ceph', binary='ceph-volume'):

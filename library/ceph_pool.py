@@ -260,7 +260,7 @@ def fatal(message, module):
     if module:
         module.fail_json(msg=message, rc=1)
     else:
-        raise(Exception(message))
+        raise (Exception(message))
 
 
 def check_pool_exist(cluster,
