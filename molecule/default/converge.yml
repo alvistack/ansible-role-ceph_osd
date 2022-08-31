@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
+- name: converge | ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
+  hosts: ceph_mon:ceph_mgr:ceph_osd:ceph_mds:ceph_rgw
   remote_user: root
   become: true
   tasks:
@@ -28,7 +29,8 @@
         name: alvistack.ceph_common
       tags: alvistack.ceph_common
 
-- hosts: ceph_mon
+- name: converge | ceph_mon
+  hosts: ceph_mon
   remote_user: root
   become: true
   tasks:
@@ -37,7 +39,8 @@
         name: alvistack.ceph_mon
       tags: alvistack.ceph_mon
 
-- hosts: ceph_mgr
+- name: converge | ceph_mgr
+  hosts: ceph_mgr
   remote_user: root
   become: true
   tasks:
@@ -46,7 +49,8 @@
         name: alvistack.ceph_mgr
       tags: alvistack.ceph_mgr
 
-- hosts: ceph_osd
+- name: converge | ceph_osd
+  hosts: ceph_osd
   remote_user: root
   become: true
   tasks:
