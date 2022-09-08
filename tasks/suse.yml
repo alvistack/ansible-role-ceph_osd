@@ -27,7 +27,7 @@
   community.general.zypper:
     name: "{{ item.name }}"
     state: "{{ item.state }}"
-    extra_args: "--allow-vendor-change"
+    force_resolution: true
   loop: "{{ _zypper[ceph_release] }}"
   register: result
   until: result is succeeded
