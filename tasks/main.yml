@@ -99,7 +99,7 @@
     - { dest: "/etc/ceph/ceph.conf", owner: "ceph", group: "ceph" }
 
 - name: tweak settings in ini files
-  ini_file:
+  community.general.ini_file:
     section: "{{ item.section }}"
     option: "{{ item.option }}"
     value: "{{ item.value }}"
@@ -145,7 +145,7 @@
   failed_when: false
 
 - name: ceph osd pool create
-  ceph_pool:
+  ceph_pool: # noqa fqcn[action]
     name: "{{ item.name }}"
     application: "{{ item.application }}"
     size: "{{ item.size | default(ceph_osd_pool_default_size) }}"
@@ -167,7 +167,7 @@
   failed_when: false
 
 - name: ceph-volume lvm create
-  ceph_volume:
+  ceph_volume: # noqa fqcn[action]
     data: "{{ item.data }}"
     objectstore: "{{ item.objectstore | default('bluestore') }}"
     data_vg: "{{ item.data_vg | default(omit) }}"
@@ -185,7 +185,7 @@
   failed_when: false
 
 - name: ceph-volume lvm activate
-  ceph_volume:
+  ceph_volume: # noqa fqcn[action]
     action: "activate"
   changed_when: false
   failed_when: false
