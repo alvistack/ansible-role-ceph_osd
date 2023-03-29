@@ -51,11 +51,6 @@ platforms:
     groups:
       - ceph_mgr
       - ceph_osd
-lint: |
-  set -euxo pipefail
-  flake8
-  yamllint .
-  ansible-lint
 dependency:
   name: galaxy
   options:
