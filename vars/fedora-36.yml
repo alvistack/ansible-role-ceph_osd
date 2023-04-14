@@ -23,4 +23,5 @@ _yum:
     - { state: "latest", name: "numactl" }
     - { state: "latest", name: "parted" }
     - { state: "latest", name: "ceph-osd" }
+    - { state: "latest", name: "ceph-volume" }
   "15.2": []
