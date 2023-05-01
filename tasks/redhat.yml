@@ -18,7 +18,7 @@
   community.general.yum_versionlock:
     name: "{{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\\..*$', '\\1-*') }}"
     state: "absent"
-  loop: "{{ _yum }}"
+  loop: "{{ _yum[ceph_release] }}"
   when: item.state == "present"
   changed_when: false
   failed_when: false
@@ -27,7 +27,7 @@
   ansible.builtin.yum:
     name: "{{ item.name }}"
     state: "{{ item.state }}"
-  loop: "{{ _yum }}"
+  loop: "{{ _yum[ceph_release] }}"
   register: result
   until: result is succeeded
   notify:
@@ -37,7 +37,7 @@
   community.general.yum_versionlock:
     name: "{{ item.name | regex_replace('^(.*)-[0-9]*:*[0-9]+\\..*$', '\\1-*') }}"
     state: "present"
-  loop: "{{ _yum }}"
+  loop: "{{ _yum[ceph_release] }}"
   when: item.state == "present"
   changed_when: false
   failed_when: false
