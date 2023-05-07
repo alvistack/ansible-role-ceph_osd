@@ -39,6 +39,21 @@ platforms:
       - ceph_osd
       - ceph_mds
       - ceph_rgw
+  - name: ${_MOLECULE_INSTANCE_NAME}-2
+    box: alvistack/opensuse-tumbleweed
+    cpu: 2
+    memory: 8192
+    provider_raw_config_args:
+      - "cpu_mode = 'host-passthrough'"
+      - "disk_bus = 'virtio'"
+      - "nic_model_type = 'virtio'"
+      - "video_type = 'virtio'"
+      - "disk_driver :cache => 'writeback'"
+      - "storage :file, bus: 'virtio', cache: 'writeback'"
+    instance_raw_config_args:
+      - "vm.box_check_update = false"
+    groups:
+      - ceph_mon
 dependency:
   name: galaxy
   options:
