@@ -13,14 +13,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-_ceph_release: "15.2"
-
-_yum:
-  "17.2": []
-  "16.2": []
-  "15.2":
-    - { state: "latest", name: "lvm2" }
-    - { state: "latest", name: "numactl" }
-    - { state: "latest", name: "parted" }
-    - { state: "present", name: "ceph-osd-100:{{ ceph_version }}*" }
