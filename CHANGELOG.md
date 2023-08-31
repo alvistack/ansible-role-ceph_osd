@@ -4,6 +4,8 @@
 
 ### Major Changes
 
+-   Support Ceph 18.2 Reef
+
 ## 8.3.0 - 2023-08-15
 
 ### Major Changes
