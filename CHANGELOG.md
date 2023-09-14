@@ -1,9 +1,14 @@
 # Ansible Role for Ceph Object Storage Daemon
 
-## 8.4.0 - TBC
+## 8.5.0 - TBC
 
 ### Major Changes
 
+## 8.4.0 - 2023-09-14
+
+### Major Changes
+
+-   Support Ansible community package 8.4.0
 -   Support Ceph 18.2 Reef
 
 ## 8.3.0 - 2023-08-15
