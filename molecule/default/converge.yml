@@ -22,12 +22,10 @@
     - name: include role
       ansible.builtin.include_role:
         name: alvistack.chrony
-      tags: alvistack.chrony
 
     - name: include role
       ansible.builtin.include_role:
         name: alvistack.ceph_common
-      tags: alvistack.ceph_common
 
 - name: converge | ceph_mon
   hosts: ceph_mon
@@ -37,7 +35,6 @@
     - name: include role
       ansible.builtin.include_role:
         name: alvistack.ceph_mon
-      tags: alvistack.ceph_mon
 
 - name: converge | ceph_mgr
   hosts: ceph_mgr
@@ -47,7 +44,6 @@
     - name: include role
       ansible.builtin.include_role:
         name: alvistack.ceph_mgr
-      tags: alvistack.ceph_mgr
 
 - name: converge | ceph_osd
   hosts: ceph_osd
@@ -57,4 +53,3 @@
     - name: include role
       ansible.builtin.include_role:
         name: alvistack.ceph_osd
-      tags: alvistack.ceph_osd
