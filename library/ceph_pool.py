@@ -506,8 +506,12 @@ def create_pool(cluster,
     Create a new pool
     '''
 
-    args = ['create', user_pool_config['pool_name']['value'],
-            user_pool_config['type']['value'], '--yes-i-really-mean-it']
+    try:
+        args = ['create', user_pool_config['pool_name']['value'],
+                user_pool_config['type']['value'], '--yes-i-really-mean-it']
+    except ValueError:
+        args = ['create', user_pool_config['pool_name']['value'],
+                user_pool_config['type']['value']]
 
     args.extend(['--pg_num',
                  user_pool_config['pg_num']['value'],
