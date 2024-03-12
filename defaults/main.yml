@@ -52,7 +52,7 @@ ceph_osd_volume: >-
   {%- set _ns = namespace() -%}
   {%- set _ns._params = [] -%}
   {%- for device, value in ansible_devices.items() -%}
-  {%-   set _ns._params = _ns._params + [{ "objectstore": "bluestore", "data": "/dev/" + device }] -%}
+  {%- set _ns._params = _ns._params + [{"objectstore": "bluestore", "data": "/dev/" + device}] -%}
   {%- endfor -%}
   {{ _ns._params }}
 
