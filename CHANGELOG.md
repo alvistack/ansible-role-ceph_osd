@@ -2,6 +2,8 @@
 
 ## 11.0.0 - TBC
 
+- Support Ceph 19.2 Squid
+
 ## 10.6.0 - 2024-11-09
 
 - Support Fedora 41
