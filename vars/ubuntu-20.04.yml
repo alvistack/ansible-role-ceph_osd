@@ -17,6 +17,7 @@
 _ceph_release: "17.2"
 
 _apt:
+  "19.2": []
   "18.2": []
   "17.2":
     - { state: latest, name: lvm2 }
