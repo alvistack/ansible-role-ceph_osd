@@ -1,6 +1,8 @@
 # Ansible Role for Ceph Object Storage Daemon
 
-## 11.0.0 - TBC
+## 11.1.0 - TBC
+
+## 11.0.0 - 2024-11-20
 
 - Support Ansible community package 11.0.0
 - Support Ceph 19.2 Squid
