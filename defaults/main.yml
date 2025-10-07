@@ -49,12 +49,12 @@ ceph_osd_config:
 # this option since ceph-volume has a built-in check which looks for empty devices.
 # Thus devices with existing partition tables will not be used.
 ceph_osd_volume: >-
-  {%- set _ns = namespace() -%}
-  {%- set _ns._params = [] -%}
+  {%- set ns = namespace() -%}
+  {%- set ns.params = [] -%}
   {%- for device, value in ansible_devices.items() -%}
-  {%- set _ns._params = _ns._params + [{"objectstore": "bluestore", "data": "/dev/" + device}] -%}
+  {%- set ns.params = ns.params + [{"objectstore": "bluestore", "data": "/dev/" + device}] -%}
   {%- endfor -%}
-  {{ _ns._params }}
+  {{ ns.params }}
 
 # Ceph OSD Pool to be created.
 ceph_osd_pool:
