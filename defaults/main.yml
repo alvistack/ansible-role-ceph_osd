@@ -43,7 +43,7 @@ ceph_osd_config:
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }
 
 # Devices to be used as OSDs.
-# Device discovery is based on the Ansible fact 'ansible_devices'
+# Device discovery is based on the Ansible fact 'ansible_facts['devices']'
 # which reports all the devices on a system. If chosen, all the disks
 # found will be passed to ceph-volume lvm batch. You should not be worried on using
 # this option since ceph-volume has a built-in check which looks for empty devices.
@@ -51,7 +51,7 @@ ceph_osd_config:
 ceph_osd_volume: >-
   {%- set ns = namespace() -%}
   {%- set ns.params = [] -%}
-  {%- for device, value in ansible_devices.items() -%}
+  {%- for device, value in ansible_facts['devices'].items() -%}
   {%- set ns.params = ns.params + [{"objectstore": "bluestore", "data": "/dev/" + device}] -%}
   {%- endfor -%}
   {{ ns.params }}
