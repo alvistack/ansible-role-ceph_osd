@@ -17,5 +17,6 @@
 _ceph_release: "17.2"
 
 _zypper:
+  - { state: present, name: "ceph-base-100:{{ ceph_version }}" }
   - { state: present, name: "ceph-osd-100:{{ ceph_version }}" }
   - { state: present, name: "ceph-volume-100:{{ ceph_version }}" }

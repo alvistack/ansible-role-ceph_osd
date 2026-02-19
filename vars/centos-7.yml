@@ -17,5 +17,6 @@
 _ceph_release: "15.2"
 
 _yum:
+  - { state: present, name: "ceph-base-100:{{ ceph_version }}*" }
   - { state: present, name: "ceph-osd-100:{{ ceph_version }}*" }
   - { state: present, name: "ceph-volume-100:{{ ceph_version }}*" }
