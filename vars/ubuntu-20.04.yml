@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_ceph_release: "17.2"
+_ceph_release: "16.2"
 
 _apt:
   - { state: present, name: "ceph-base=100:{{ ceph_version }}*" }
