@@ -2,6 +2,8 @@
 
 ## 13.4.0 - TBC
 
+- Support Ceph 20.2 Tentacle
+
 ## 13.3.0 - 2026-02-03
 
 - Support openSUSE Leap 16.0

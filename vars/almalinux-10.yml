@@ -14,21 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_ceph_release: "19.2"
+_ceph_release: "20.2"
 
 _yum:
-  "19.2":
-    - { state: latest, name: lvm2 }
-    - { state: latest, name: numactl }
-    - { state: latest, name: parted }
-    - { state: present, name: "ceph-osd-100:{{ ceph_version }}*" }
-    - { state: present, name: "ceph-volume-100:{{ ceph_version }}*" }
-  "18.2":
-    - { state: latest, name: lvm2 }
-    - { state: latest, name: numactl }
-    - { state: latest, name: parted }
-    - { state: present, name: "ceph-osd-100:{{ ceph_version }}*" }
-    - { state: present, name: "ceph-volume-100:{{ ceph_version }}*" }
-  "17.2": []
-  "16.2": []
-  "15.2": []
+  - { state: present, name: "ceph-base-100:{{ ceph_version }}*" }
+  - { state: present, name: "ceph-osd-100:{{ ceph_version }}*" }
+  - { state: present, name: "ceph-volume-100:{{ ceph_version }}*" }
