@@ -36,10 +36,10 @@ ceph_osd_config:
   - { state: present, section: osd, option: bluestore_cache_autotune, value: "false" }  # true
   - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.2" }  # 0.45
   - { state: present, section: osd, option: bluestore_cache_meta_ratio, value: "0.2" }  # 0.45
-  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ 0.5 * 1024 * 1024 * 1024 }}" }  # 3Gi / 8
+  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ 0.5 * 1024 * 1024 * 1024 | int }}" }  # 3Gi / 8
   - { state: present, section: osd, option: osd_disk_threads, value: "2" }  # 1
-  - { state: present, section: osd, option: osd_memory_base, value: "{{ 0.125 * 1024 * 1024 * 1024 }}" }  # 768Mi / 8
-  - { state: present, section: osd, option: osd_memory_target, value: "{{ 0.5 * 1024 * 1024 * 1024 }}" }  # 4Gi / 8
+  - { state: present, section: osd, option: osd_memory_base, value: "{{ 0.125 * 1024 * 1024 * 1024 | int }}" }  # 768Mi / 8
+  - { state: present, section: osd, option: osd_memory_target, value: "{{ 0.5 * 1024 * 1024 * 1024 | int }}" }  # 4Gi / 8
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }  # false
 
 # Devices to be used as OSDs.
