@@ -21,7 +21,7 @@ ceph_release: "{{ _ceph_release }}"
 ceph_version: "{{ _ceph_version[ceph_release] }}"
 
 # Ceph detected memory total (default with 8192Mi).
-ceph_memtotal_mb: "{{ (((ansible_facts['ansible_memtotal_mb'] / 1024) | round(0, 'ceil')) * 1024) | int }}"
+ceph_memtotal_mb: "{{ (((ansible_facts['memtotal_mb'] / 1024) | round(0, 'ceil')) * 1024) | int }}"
 
 # Sets the number of replicas for objects in the pool.
 ceph_osd_pool_default_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(3, 1) }}"
