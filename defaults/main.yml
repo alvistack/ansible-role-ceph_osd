@@ -21,7 +21,7 @@ ceph_release: "{{ _ceph_release }}"
 ceph_version: "{{ _ceph_version[ceph_release] }}"
 
 # Ceph detected memory total (default with 8192Mi).
-ceph_memtotal_mb: "{{ (((ansible_facts['memtotal_mb'] / 1024) | round(0, 'ceil')) * 1024) | int }}"
+ceph_memtotal_mb: "{{ (((ansible_facts['memtotal_mb'] + 1023) // 1024) * 1024) | int }}"
 
 # Sets the number of replicas for objects in the pool.
 ceph_osd_pool_default_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary(3, 1) }}"
@@ -34,15 +34,16 @@ ceph_osd_pool_default_min_size: "{{ (groups['ceph_osd'] | length >= 3) | ternary
 ceph_osd_pool_autoscale_profile: scale-up
 
 # Ceph Object Storage Daemon configs.
+# See https://github.com/ceph/ceph/blob/main/src/common/options/global.yaml.in
 ceph_osd_config:
   - { state: present, section: osd, option: bluefs_buffered_io, value: "true" }  # true
   - { state: present, section: osd, option: bluestore_cache_autotune, value: "false" }  # true
   - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.2" }  # 0.45
   - { state: present, section: osd, option: bluestore_cache_meta_ratio, value: "0.2" }  # 0.45
-  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ ((ceph_memtotal_mb / 16) * 1024 * 1024) | int }}" }  # 3Gi / 8 ~= 512Mi
+  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ (ceph_memtotal_mb * (512 / 8192) * 1024 * 1024) | int }}" }  # 3Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_disk_threads, value: "2" }  # 1
-  - { state: present, section: osd, option: osd_memory_base, value: "{{ ((ceph_memtotal_mb / 64) * 1024 * 1024) | int }}" }  # 768Mi / 8 ~= 128Mi
-  - { state: present, section: osd, option: osd_memory_target, value: "{{ ((ceph_memtotal_mb / 16) * 1024 * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
+  - { state: present, section: osd, option: osd_memory_base, value: "{{ (ceph_memtotal_mb * (128 / 8192) * 1024 * 1024) | int }}" }  # 768Mi / 8 ~= 128Mi
+  - { state: present, section: osd, option: osd_memory_target, value: "{{ (ceph_memtotal_mb * (512 / 8192) * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }  # false
 
 # Devices to be used as OSDs.
