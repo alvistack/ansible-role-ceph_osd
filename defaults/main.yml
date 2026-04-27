@@ -40,10 +40,10 @@ ceph_osd_config:
   - { state: present, section: osd, option: bluestore_cache_autotune, value: "false" }  # true
   - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.2" }  # 0.45
   - { state: present, section: osd, option: bluestore_cache_meta_ratio, value: "0.2" }  # 0.45
-  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ (ceph_memtotal_mb * (512 / 8192) * 1024 * 1024) | int }}" }  # 3Gi / 8 ~= 512Mi
+  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ ((ceph_memtotal_mb | float) * (512 / 8192) * 1024 * 1024) | int }}" }  # 3Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_disk_threads, value: "2" }  # 1
-  - { state: present, section: osd, option: osd_memory_base, value: "{{ (ceph_memtotal_mb * (128 / 8192) * 1024 * 1024) | int }}" }  # 768Mi / 8 ~= 128Mi
-  - { state: present, section: osd, option: osd_memory_target, value: "{{ (ceph_memtotal_mb * (512 / 8192) * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
+  - { state: present, section: osd, option: osd_memory_base, value: "{{ ((ceph_memtotal_mb | float) * (128 / 8192) * 1024 * 1024) | int }}" }  # 768Mi / 8 ~= 128Mi
+  - { state: present, section: osd, option: osd_memory_target, value: "{{ ((ceph_memtotal_mb | float) * (512 / 8192) * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }  # false
 
 # Devices to be used as OSDs.
