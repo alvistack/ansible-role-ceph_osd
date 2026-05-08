@@ -24,6 +24,8 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _dnf
 
 - name: dnf install
   ansible.builtin.dnf:
@@ -34,6 +36,8 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+  tags:
+    - _dnf
 
 - name: dnf versionlock add
   ansible.builtin.shell:
@@ -46,3 +50,5 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _dnf

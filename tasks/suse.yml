@@ -20,6 +20,8 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _zypper
 
 - name: zypper install
   vars:
@@ -33,6 +35,8 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+  tags:
+    - _zypper
 
 - name: zypper addlock
   ansible.builtin.command:
@@ -41,3 +45,5 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _zypper
