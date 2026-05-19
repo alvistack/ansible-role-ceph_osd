@@ -21,6 +21,8 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _apt
 
 - name: apt-get install
   ansible.builtin.apt:
@@ -33,6 +35,8 @@
   until: result is succeeded
   notify:
     - ceph_osd | systemctl restart ceph-osd.target
+  tags:
+    - _apt
 
 - name: apt-mark hold
   ansible.builtin.dpkg_selections:
@@ -42,3 +46,5 @@
   when: item.state == "present"
   changed_when: false
   failed_when: false
+  tags:
+    - _apt
