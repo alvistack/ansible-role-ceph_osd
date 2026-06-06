@@ -36,6 +36,8 @@ ceph_osd_pool_autoscale_profile: scale-up
 # Ceph Object Storage Daemon configs.
 # See https://github.com/ceph/ceph/blob/main/src/common/options/global.yaml.in
 ceph_osd_config:
+  - { state: present, section: osd, option: osd_max_backfills, value: "1" }
+  - { state: present, section: osd, option: osd_recovery_max_active, value: "1" }
   - { state: present, section: osd, option: bluefs_buffered_io, value: "true" }  # true
   - { state: present, section: osd, option: bluestore_cache_autotune, value: "false" }  # true
   - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.2" }  # 0.45
