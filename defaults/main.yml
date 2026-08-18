@@ -47,6 +47,7 @@ ceph_osd_config:
   - { state: present, section: osd, option: osd_memory_base, value: "{{ ((ceph_memtotal_mb | float) * (128 / 8192) * 1024 * 1024) | int }}" }  # 768Mi / 8 ~= 128Mi
   - { state: present, section: osd, option: osd_memory_target, value: "{{ ((ceph_memtotal_mb | float) * (512 / 8192) * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }  # false
+  - { state: present, section: osd, option: osd_op_threads, value: "4" }  # 2
 
 # Devices to be used as OSDs.
 # Device discovery is based on the Ansible fact 'ansible_facts['devices']'
