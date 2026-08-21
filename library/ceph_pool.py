@@ -500,7 +500,8 @@ def list_pools(cluster,
     return cmd
 
 
-def create_pool(cluster,
+def create_pool(module,
+                cluster,
                 name,
                 user,
                 user_key,
@@ -512,6 +513,11 @@ def create_pool(cluster,
 
     args = ['create', user_pool_config['pool_name']['value'],
             user_pool_config['type']['value']]
+
+    # Check Ceph version: Reef (18+) and Squid (20+) require safety flag for '.' pool names
+    major_version = detect_ceph_version(module, container_image)
+    if user_pool_config['pool_name']['value'].startswith('.') and major_version >= 18:
+        args.append('--yes-i-really-mean-it')
 
     args.extend(['--pg_num',
                  user_pool_config['pg_num']['value'],
@@ -734,7 +740,8 @@ def run_module():
 
         if rc != 0:
             rc, cmd, out, err = exec_command(module,
-                                             create_pool(cluster,
+                                             create_pool(module,
+                                                         cluster,
                                                          name,
                                                          user,
                                                          user_key,
