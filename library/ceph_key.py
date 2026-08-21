@@ -21,6 +21,7 @@ from ansible.module_utils.basic import AnsibleModule
 import datetime
 import json
 import os
+import re
 import struct
 import time
 import base64
@@ -231,7 +232,7 @@ def container_exec(binary, container_image, interactive=False):
     Build the docker CLI to run a command inside a container
     '''
 
-    container_binary = os.getenv('CEPH_CONTAINER_BINARY')
+    container_binary = os.getenv('CEPH_CONTAINER_BINARY', 'podman')
     command_exec = [container_binary, 'run']
 
     if interactive:
@@ -326,14 +327,46 @@ def str_to_bool(val):
         raise ValueError("Invalid input value: %s" % val)
 
 
-def generate_secret():
+def detect_ceph_version(module, container_image=None):
     '''
-    Generate a CephX secret
+    Automatically detect the major version of Ceph running on host/container
+    '''
+    cmd = pre_generate_ceph_cmd(container_image=container_image)
+    cmd.append('--version')
+    rc, out, err = module.run_command(cmd)
+
+    if rc == 0 and out:
+        match = re.search(r'version\s+(\d+)\.', out)
+        if match:
+            return int(match.group(1))
+
+    # Fallback to 20 (Squid) if version query fails
+    return 20
+
+
+def generate_secret(module=None, container_image=None):
+    '''
+    Generate a CephX secret automatically based on cluster version.
+    - Major version >= 16: Type 2 (CEPH_CRYPTO_AES256K), 32 bytes (Reef, Squid)
+    - Major version <= 15: Type 1 (CEPH_CRYPTO_AES), 16 bytes (Octopus)
     '''
 
-    key = os.urandom(16)
-    header = struct.pack('<hiih', 1, int(time.time()), 0, len(key))
-    secret = base64.b64encode(header + key)
+    key_type = 'aes256k'
+    if module:
+        major_version = detect_ceph_version(module, container_image)
+        if major_version < 16:
+            key_type = 'aes'
+
+    if key_type == 'aes':
+        key_len = 16
+        crypto_type = 1
+    else:
+        key_len = 32
+        crypto_type = 2
+
+    key = os.urandom(key_len)
+    header = struct.pack('<hiih', crypto_type, int(time.time()), 0, len(key))
+    secret = base64.b64encode(header + key).decode('utf-8')
 
     return secret
 
@@ -344,6 +377,8 @@ def generate_caps(_type, caps):
     '''
 
     caps_cli = []
+    if not caps:
+        return caps_cli
 
     for k, v in caps.items():
         # makes sure someone didn't pass an empty var,
@@ -392,7 +427,7 @@ def create_key(module, result, cluster, user, user_key, name, secret, caps, impo
 
     cmd_list = []
     if not secret:
-        secret = generate_secret()
+        secret = generate_secret(module, container_image)
 
     if user == 'client.admin':
         args = ['import', '-i', dest]
@@ -764,7 +799,7 @@ def run_module():
             file_args['path'] = key_path
             module.set_fs_attributes_if_different(file_args, False)
     elif state == "generate_secret":
-        out = generate_secret().decode()
+        out = generate_secret(module, container_image)
         cmd = ''
         rc = 0
         err = ''
@@ -774,17 +809,17 @@ def run_module():
     delta = endd - startd
 
     result = dict(
-        cmd=cmd,
+        cmd=cmd if 'cmd' in locals() else '',
         start=str(startd),
         end=str(endd),
         delta=str(delta),
-        rc=rc,
-        stdout=out.rstrip("\r\n"),
-        stderr=err.rstrip("\r\n"),
+        rc=rc if 'rc' in locals() else 0,
+        stdout=out.rstrip("\r\n") if isinstance(out, str) else str(out),
+        stderr=err.rstrip("\r\n") if isinstance(err, str) else str(err),
         changed=changed,
     )
 
-    if rc != 0:
+    if result['rc'] != 0:
         module.fail_json(msg='non-zero return code', **result)
 
     module.exit_json(**result)
