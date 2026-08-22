@@ -624,9 +624,10 @@ def update_pool(module, cluster, name,
                 return rc, cmd, out, err
 
         else:
-            rc, cmd, out, err = exec_command(module, disable_application_pool(cluster, name, delta['application']['old_application'], user, user_key, container_image=container_image))  # noqa: E501
-            if rc != 0:
-                return rc, cmd, out, err
+            if delta['application']['old_application']:
+                rc, cmd, out, err = exec_command(module, disable_application_pool(cluster, name, delta['application']['old_application'], user, user_key, container_image=container_image))  # noqa: E501
+                if rc != 0:
+                    return rc, cmd, out, err
 
             rc, cmd, out, err = exec_command(module, enable_application_pool(cluster, name, delta['application']['new_application'], user, user_key, container_image=container_image))  # noqa: E501
             if rc != 0:
