@@ -445,7 +445,7 @@ def generate_ceph_authtool_cmd(cluster, name, secret, caps, dest, container_imag
 
 def import_keyring_cmd(dest, keyring_file, container_image=None):
     '''
-    Generate 'ceph-authtool <dest> --import-keyring <keyring_file>' command line
+    Generate 'ceph-authtool <dest> --import-keyring <keyring_file>' command line  # noqa: E501
     '''
 
     if container_image:

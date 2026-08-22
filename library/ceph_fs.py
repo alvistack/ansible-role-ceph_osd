@@ -424,10 +424,10 @@ def run_module():
     max_mds = module.params.get('max_mds')
     subvolumegroup = module.params.get('subvolumegroup')
 
-    # Validate required parameters for state=present when not using subvolumegroup
+    # Validate required parameters for state=present when not using subvolumegroup  # noqa: E501
     if state == 'present' and not subvolumegroup:
         if not data or not metadata:
-            fatal("missing required arguments for filesystem creation: data, metadata", module)
+            fatal("missing required arguments for filesystem creation: data, metadata", module)  # noqa: E501
 
     if module.check_mode:
         module.exit_json(
