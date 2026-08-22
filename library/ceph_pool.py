@@ -88,6 +88,11 @@ options:
             - set the pg autoscaler on the pool.
         required: false
         default: 'on'
+    pg_autoscale_profile:
+        description:
+            - set the pg autoscale profile on the pool (e.g. 'scale-up').
+        required: false
+        default: None
     pg_num_min:
         description:
             - set the pg_num_min of the pool.
@@ -134,7 +139,7 @@ EXAMPLES = '''
 
 pools:
   - { name: foo, size: 3, application: rbd, pool_type: 'replicated',
-      pg_autoscale_mode: 'on' }
+      pg_autoscale_mode: 'on', pg_autoscale_profile: 'scale-up' }
 
 - hosts: all
   become: true
@@ -147,6 +152,7 @@ pools:
         application: "{{ item.application }}"
         pool_type: "{{ item.pool_type }}"
         pg_autoscale_mode: "{{ item.pg_autoscale_mode }}"
+        pg_autoscale_profile: "{{ item.pg_autoscale_profile }}"
       with_items: "{{ pools }}"
 '''
 
@@ -439,6 +445,13 @@ def get_pool_details(module,
     else:
         out['pg_autoscale_bias'] = None
 
+    if 'pg_autoscale_profile' in out['options'].keys():
+        out['pg_autoscale_profile'] = out['options']['pg_autoscale_profile']
+    elif 'pg_autoscale_profile' in out.keys():
+        out['pg_autoscale_profile'] = out['pg_autoscale_profile']
+    else:
+        out['pg_autoscale_profile'] = None
+
     application = list(json.loads(application_pool.strip()).keys())
 
     if len(application) == 0:
@@ -456,7 +469,8 @@ def compare_pool_config(user_pool_config, running_pool_details):
 
     delta = {}
     filter_keys = ['pg_num', 'pg_placement_num', 'size', 'pg_autoscale_mode',
-                   'pg_num_min', 'target_size_ratio', 'pg_autoscale_bias']
+                   'pg_autoscale_profile', 'pg_num_min', 'target_size_ratio',
+                   'pg_autoscale_bias']
     for key in filter_keys:
         if (str(running_pool_details[key]) != user_pool_config[key]['value'] and  # noqa: E501
                 user_pool_config[key]['value']):
@@ -514,9 +528,9 @@ def create_pool(module,
     args = ['create', user_pool_config['pool_name']['value'],
             user_pool_config['type']['value']]
 
-    # Check Ceph version: Reef (18+) and Squid (20+) require safety flag for '.' pool names
+    # Check Ceph version: Reef (18+) and Squid (20+) require safety flag for '.' pool names  # noqa: E501
     major_version = detect_ceph_version(module, container_image)
-    if user_pool_config['pool_name']['value'].startswith('.') and major_version >= 18:
+    if user_pool_config['pool_name']['value'].startswith('.') and major_version >= 18:  # noqa: E501
         args.append('--yes-i-really-mean-it')
 
     args.extend(['--pg_num',
@@ -636,6 +650,7 @@ def run_module():
         pg_num=dict(type='str', required=False),
         pgp_num=dict(type='str', required=False),
         pg_autoscale_mode=dict(type='str', required=False, default='on'),
+        pg_autoscale_profile=dict(type='str', required=False, default=None),
         pg_num_min=dict(type='str', required=False, default='8'),
         target_size_ratio=dict(type='str', required=False, default='0.1'),
         pg_autoscale_bias=dict(type='str', required=False, default='1.0'),
@@ -662,6 +677,7 @@ def run_module():
     pg_num = module.params.get('pg_num')
     pgp_num = module.params.get('pgp_num')
     pg_autoscale_mode = module.params.get('pg_autoscale_mode')
+    pg_autoscale_profile = module.params.get('pg_autoscale_profile')
     pg_num_min = module.params.get('pg_num_min')
     target_size_ratio = module.params.get('target_size_ratio')
     pg_autoscale_bias = module.params.get('pg_autoscale_bias')
@@ -696,6 +712,8 @@ def run_module():
         'pgp_num': {'value': pgp_num, 'cli_set_opt': 'pgp_num'},
         'pg_autoscale_mode': {'value': pg_autoscale_mode,
                               'cli_set_opt': 'pg_autoscale_mode'},
+        'pg_autoscale_profile': {'value': pg_autoscale_profile,
+                                 'cli_set_opt': 'autoscale-profile'},
         'pg_num_min': {'value': pg_num_min, 'cli_set_opt': 'pg_num_min'},
         'target_size_ratio': {'value': target_size_ratio,
                               'cli_set_opt': 'target_size_ratio'},
