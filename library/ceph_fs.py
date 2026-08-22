@@ -414,14 +414,20 @@ def run_module():
     module = AnsibleModule(
         argument_spec=module_args,
         supports_check_mode=True,
-        required_if=[['state', 'present', ['data', 'metadata']]],
     )
 
     # Gather module parameters in variables
     name = module.params.get('name')
     state = module.params.get('state')
+    data = module.params.get('data')
+    metadata = module.params.get('metadata')
     max_mds = module.params.get('max_mds')
     subvolumegroup = module.params.get('subvolumegroup')
+
+    # Validate required parameters for state=present when not using subvolumegroup
+    if state == 'present' and not subvolumegroup:
+        if not data or not metadata:
+            fatal("missing required arguments for filesystem creation: data, metadata", module)
 
     if module.check_mode:
         module.exit_json(
