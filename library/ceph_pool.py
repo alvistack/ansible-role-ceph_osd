@@ -22,6 +22,7 @@ from ansible.module_utils.basic import AnsibleModule
 import datetime
 import json
 import os
+import re
 
 
 ANSIBLE_METADATA = {
@@ -87,6 +88,11 @@ options:
             - set the pg autoscaler on the pool.
         required: false
         default: 'on'
+    pg_autoscale_profile:
+        description:
+            - set the pg autoscale profile on the pool (e.g. 'scale-up').
+        required: false
+        default: None
     pg_num_min:
         description:
             - set the pg_num_min of the pool.
@@ -133,7 +139,7 @@ EXAMPLES = '''
 
 pools:
   - { name: foo, size: 3, application: rbd, pool_type: 'replicated',
-      pg_autoscale_mode: 'on' }
+      pg_autoscale_mode: 'on', pg_autoscale_profile: 'scale-up' }
 
 - hosts: all
   become: true
@@ -146,6 +152,7 @@ pools:
         application: "{{ item.application }}"
         pool_type: "{{ item.pool_type }}"
         pg_autoscale_mode: "{{ item.pg_autoscale_mode }}"
+        pg_autoscale_profile: "{{ item.pg_autoscale_profile }}"
       with_items: "{{ pools }}"
 '''
 
@@ -181,7 +188,7 @@ def container_exec(binary, container_image, interactive=False):
     Build the docker CLI to run a command inside a container
     '''
 
-    container_binary = os.getenv('CEPH_CONTAINER_BINARY')
+    container_binary = os.getenv('CEPH_CONTAINER_BINARY', 'podman')
     command_exec = [container_binary, 'run']
 
     if interactive:
@@ -261,6 +268,23 @@ def fatal(message, module):
         module.fail_json(msg=message, rc=1)
     else:
         raise (Exception(message))
+
+
+def detect_ceph_version(module, container_image=None):
+    '''
+    Automatically detect the major version of Ceph running on host/container
+    '''
+    cmd = pre_generate_ceph_cmd(container_image=container_image)
+    cmd.append('--version')
+    rc, out, err = module.run_command(cmd)
+
+    if rc == 0 and out:
+        match = re.search(r'version\s+(\d+)\.', out)
+        if match:
+            return int(match.group(1))
+
+    # Default to 20 if version query fails
+    return 20
 
 
 def check_pool_exist(cluster,
@@ -406,19 +430,6 @@ def get_pool_details(module,
                                                                           user_key,    # noqa: E501
                                                                           container_image=container_image))  # noqa: E501
 
-    # This is a trick because "target_size_ratio" isn't present at the same
-    # level in the dict
-    # ie:
-    # {
-    # 'pg_num': 8,
-    # 'pgp_num': 8,
-    # 'pg_autoscale_mode': 'on',
-    #     'options': {
-    #          'target_size_ratio': 0.1
-    #     }
-    # }
-    # If 'target_size_ratio' is present in 'options', we set it, this way we
-    # end up with a dict containing all needed keys at the same level.
     if 'pg_num_min' in out['options'].keys():
         out['pg_num_min'] = out['options']['pg_num_min']
     else:
@@ -433,6 +444,13 @@ def get_pool_details(module,
         out['pg_autoscale_bias'] = out['options']['pg_autoscale_bias']
     else:
         out['pg_autoscale_bias'] = None
+
+    if 'pg_autoscale_profile' in out['options'].keys():
+        out['pg_autoscale_profile'] = out['options']['pg_autoscale_profile']
+    elif 'pg_autoscale_profile' in out.keys():
+        out['pg_autoscale_profile'] = out['pg_autoscale_profile']
+    else:
+        out['pg_autoscale_profile'] = None
 
     application = list(json.loads(application_pool.strip()).keys())
 
@@ -451,7 +469,8 @@ def compare_pool_config(user_pool_config, running_pool_details):
 
     delta = {}
     filter_keys = ['pg_num', 'pg_placement_num', 'size', 'pg_autoscale_mode',
-                   'pg_num_min', 'target_size_ratio', 'pg_autoscale_bias']
+                   'pg_autoscale_profile', 'pg_num_min', 'target_size_ratio',
+                   'pg_autoscale_bias']
     for key in filter_keys:
         if (str(running_pool_details[key]) != user_pool_config[key]['value'] and  # noqa: E501
                 user_pool_config[key]['value']):
@@ -462,7 +481,6 @@ def compare_pool_config(user_pool_config, running_pool_details):
             user_pool_config['application']['value']):
         delta['application'] = {}
         delta['application']['new_application'] = user_pool_config['application']['value']  # noqa: E501
-        # to be improved (for update_pools()...)
         delta['application']['value'] = delta['application']['new_application']
         delta['application']['old_application'] = running_pool_details['application']  # noqa: E501
 
@@ -496,7 +514,8 @@ def list_pools(cluster,
     return cmd
 
 
-def create_pool(cluster,
+def create_pool(module,
+                cluster,
                 name,
                 user,
                 user_key,
@@ -508,6 +527,11 @@ def create_pool(cluster,
 
     args = ['create', user_pool_config['pool_name']['value'],
             user_pool_config['type']['value']]
+
+    # Check Ceph version: Reef (18+) and Squid (20+) require safety flag for '.' pool names  # noqa: E501
+    major_version = detect_ceph_version(module, container_image)
+    if user_pool_config['pool_name']['value'].startswith('.') and major_version >= 18:  # noqa: E501
+        args.append('--yes-i-really-mean-it')
 
     args.extend(['--pg_num',
                  user_pool_config['pg_num']['value'],
@@ -551,12 +575,17 @@ def create_pool(cluster,
     return cmd
 
 
-def remove_pool(cluster, name, user, user_key, container_image=None):
+def remove_pool(module, cluster, name, user, user_key, container_image=None):
     '''
     Remove a pool
     '''
 
+    major_version = detect_ceph_version(module, container_image)
     args = ['rm', name, name, '--yes-i-really-really-mean-it']
+
+    # Ceph 18+ (Reef) and Ceph 20+ (Squid) enforce safety flags
+    if major_version >= 18:
+        args.append('--force')
 
     cmd = generate_ceph_cmd(sub_cmd=['osd', 'pool'],
                             args=args,
@@ -595,9 +624,10 @@ def update_pool(module, cluster, name,
                 return rc, cmd, out, err
 
         else:
-            rc, cmd, out, err = exec_command(module, disable_application_pool(cluster, name, delta['application']['old_application'], user, user_key, container_image=container_image))  # noqa: E501
-            if rc != 0:
-                return rc, cmd, out, err
+            if delta['application']['old_application']:
+                rc, cmd, out, err = exec_command(module, disable_application_pool(cluster, name, delta['application']['old_application'], user, user_key, container_image=container_image))  # noqa: E501
+                if rc != 0:
+                    return rc, cmd, out, err
 
             rc, cmd, out, err = exec_command(module, enable_application_pool(cluster, name, delta['application']['new_application'], user, user_key, container_image=container_image))  # noqa: E501
             if rc != 0:
@@ -621,6 +651,7 @@ def run_module():
         pg_num=dict(type='str', required=False),
         pgp_num=dict(type='str', required=False),
         pg_autoscale_mode=dict(type='str', required=False, default='on'),
+        pg_autoscale_profile=dict(type='str', required=False, default=None),
         pg_num_min=dict(type='str', required=False, default='8'),
         target_size_ratio=dict(type='str', required=False, default='0.1'),
         pg_autoscale_bias=dict(type='str', required=False, default='1.0'),
@@ -647,6 +678,7 @@ def run_module():
     pg_num = module.params.get('pg_num')
     pgp_num = module.params.get('pgp_num')
     pg_autoscale_mode = module.params.get('pg_autoscale_mode')
+    pg_autoscale_profile = module.params.get('pg_autoscale_profile')
     pg_num_min = module.params.get('pg_num_min')
     target_size_ratio = module.params.get('target_size_ratio')
     pg_autoscale_bias = module.params.get('pg_autoscale_bias')
@@ -681,6 +713,8 @@ def run_module():
         'pgp_num': {'value': pgp_num, 'cli_set_opt': 'pgp_num'},
         'pg_autoscale_mode': {'value': pg_autoscale_mode,
                               'cli_set_opt': 'pg_autoscale_mode'},
+        'pg_autoscale_profile': {'value': pg_autoscale_profile,
+                                 'cli_set_opt': 'autoscale-profile'},
         'pg_num_min': {'value': pg_num_min, 'cli_set_opt': 'pg_num_min'},
         'target_size_ratio': {'value': target_size_ratio,
                               'cli_set_opt': 'target_size_ratio'},
@@ -709,7 +743,6 @@ def run_module():
     startd = datetime.datetime.now()
     changed = False
 
-    # will return either the image name or None
     container_image = is_containerized()
 
     user = "client.admin"
@@ -726,7 +759,8 @@ def run_module():
 
         if rc != 0:
             rc, cmd, out, err = exec_command(module,
-                                             create_pool(cluster,
+                                             create_pool(module,
+                                                         cluster,
                                                          name,
                                                          user,
                                                          user_key,
@@ -741,7 +775,6 @@ def run_module():
                                                                    user_key,
                                                                    container_image=container_image))  # noqa: E501
             if user_pool_config['min_size']['value']:
-                # not implemented yet
                 pass
             changed = True
 
@@ -781,7 +814,7 @@ def run_module():
     elif state == "list":
         rc, cmd, out, err = exec_command(module,
                                          list_pools(cluster,
-                                                    name, user,
+                                                    user,
                                                     user_key,
                                                     details,
                                                     container_image=container_image))  # noqa: E501
@@ -796,7 +829,8 @@ def run_module():
                                                           container_image=container_image))  # noqa: E501
         if rc == 0:
             rc, cmd, out, err = exec_command(module,
-                                             remove_pool(cluster,
+                                             remove_pool(module,
+                                                         cluster,
                                                          name,
                                                          user,
                                                          user_key,

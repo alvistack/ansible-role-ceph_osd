@@ -68,3 +68,7 @@ ceph_osd_pool:
   - { name: rbd, application: rbd }
   - { name: cephfs_metadata, application: cephfs, target_size_ratio: "0.4", pg_autoscale_bias: "4.0" }
   - { name: cephfs_data, application: cephfs, target_size_ratio: "0.4" }
+  - { name: .rgw.root, application: rgw }
+  - { name: default.rgw.log, application: rgw }
+  - { name: default.rgw.control, application: rgw }
+  - { name: default.rgw.meta, application: rgw, pg_autoscale_bias: "4.0" }

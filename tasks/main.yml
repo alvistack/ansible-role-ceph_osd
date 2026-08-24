@@ -103,8 +103,8 @@
   community.general.ini_file:
     section: "{{ item.section }}"
     option: "{{ item.option }}"
-    value: "{{ item.value }}"
     state: "{{ item.state }}"
+    value: "{{ item.value | default(omit) }}"
     path: /etc/ceph/ceph.conf
     mode: "0644"
   loop: "{{ ceph_osd_config }}"
@@ -134,18 +134,6 @@
   changed_when: false
   failed_when: false
 
-- name: ceph osd pool set autoscale-profile
-  ansible.builtin.shell:
-    cmd: |
-      set -euxo pipefail
-      ceph osd pool set autoscale-profile {{ ceph_osd_pool_autoscale_profile }}
-  args:
-    executable: /bin/bash
-  when: inventory_hostname == ansible_play_hosts[0]
-  delegate_to: "{{ ansible_play_hosts[0] }}"
-  changed_when: false
-  failed_when: false
-
 - name: ceph osd pool create
   ceph_pool: # noqa fqcn[action]
     name: "{{ item.name }}"
@@ -155,6 +143,7 @@
     pg_num: "{{ item.pg_num | default('8') }}"
     pgp_num: "{{ item.pgp_num | default('8') }}"
     pg_autoscale_mode: "{{ item.pg_autoscale_mode | default('on') }}"
+    pg_autoscale_profile: "{{ item.pg_autoscale_profile | default('scale-up') }}"
     pg_num_min: "{{ item.pg_num_min | default('8') }}"
     target_size_ratio: "{{ item.target_size_ratio | default('0.1') }}"
     pg_autoscale_bias: "{{ item.pg_autoscale_bias | default('1.0') }}"

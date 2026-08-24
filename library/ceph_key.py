@@ -21,6 +21,7 @@ from ansible.module_utils.basic import AnsibleModule
 import datetime
 import json
 import os
+import re
 import struct
 import time
 import base64
@@ -80,8 +81,9 @@ options:
             If 'info' is used, the module will return in a json format the
             description of a given keyring.
             If 'generate_secret' is used, the module will simply output a cephx keyring.
+            If 'import_keyring' is used, the module imports a keyring file into a target keyring file using ceph-authtool.
         required: false
-        choices: ['present', 'update', 'absent', 'list', 'info', 'fetch_initial_keys', 'generate_secret']
+        choices: ['present', 'update', 'absent', 'list', 'info', 'fetch_initial_keys', 'generate_secret', 'import_keyring']
         default: present
     caps:
         description:
@@ -105,6 +107,11 @@ options:
             - Destination to write the keyring, can a file or a directory
         required: false
         default: /etc/ceph/
+    import_keyring:
+        description:
+            - Path to the keyring file to import when state is 'import_keyring'.
+        required: false
+        default: None
     fetch_initial_keys:
         description:
             - Fetch client.admin and bootstrap key.
@@ -119,6 +126,11 @@ options:
             entity.
         required: false
         default: json
+    key_type:
+        description:
+            - Explicitly specify cryptographic key algorithm to use when generating secrets.
+        required: false
+        choices: ['aes', 'aes256k']
 '''
 
 EXAMPLES = '''
@@ -193,6 +205,17 @@ caps:
 - name: fetch cephx keys
   ceph_key:
     state: fetch_initial_keys
+
+- name: generate secret explicitly using aes key algorithm
+  ceph_key:
+    state: generate_secret
+    key_type: aes
+
+- name: import keyring into monitor keyring
+  ceph_key:
+    dest: /var/lib/ceph/tmp/ceph.mon.keyring
+    import_keyring: /etc/ceph/ceph.client.admin.keyring
+    state: import_keyring
 '''
 
 RETURN = '''#  '''
@@ -231,7 +254,7 @@ def container_exec(binary, container_image, interactive=False):
     Build the docker CLI to run a command inside a container
     '''
 
-    container_binary = os.getenv('CEPH_CONTAINER_BINARY')
+    container_binary = os.getenv('CEPH_CONTAINER_BINARY', 'podman')
     command_exec = [container_binary, 'run']
 
     if interactive:
@@ -326,14 +349,47 @@ def str_to_bool(val):
         raise ValueError("Invalid input value: %s" % val)
 
 
-def generate_secret():
+def detect_ceph_version(module, container_image=None):
     '''
-    Generate a CephX secret
+    Automatically detect the major version of Ceph running on host/container
+    '''
+    cmd = pre_generate_ceph_cmd(container_image=container_image)
+    cmd.append('--version')
+    rc, out, err = module.run_command(cmd)
+
+    if rc == 0 and out:
+        match = re.search(r'version\s+(\d+)\.', out)
+        if match:
+            return int(match.group(1))
+
+    # Fallback to 20 (Squid) if version query fails
+    return 20
+
+
+def generate_secret(module=None, container_image=None, key_type=None):
+    '''
+    Generate a CephX secret automatically based on key_type parameter or cluster version.  # noqa: E501
+    - Major version >= 16: Type 2 (CEPH_CRYPTO_AES256K), 32 bytes (Reef, Squid)
+    - Major version <= 15: Type 1 (CEPH_CRYPTO_AES), 16 bytes (Octopus)
     '''
 
-    key = os.urandom(16)
-    header = struct.pack('<hiih', 1, int(time.time()), 0, len(key))
-    secret = base64.b64encode(header + key)
+    if not key_type:
+        key_type = 'aes256k'
+        if module:
+            major_version = detect_ceph_version(module, container_image)
+            if major_version < 16:
+                key_type = 'aes'
+
+    if key_type == 'aes':
+        key_len = 16
+        crypto_type = 1
+    else:
+        key_len = 32
+        crypto_type = 2
+
+    key = os.urandom(key_len)
+    header = struct.pack('<hiih', crypto_type, int(time.time()), 0, len(key))
+    secret = base64.b64encode(header + key).decode('utf-8')
 
     return secret
 
@@ -344,6 +400,8 @@ def generate_caps(_type, caps):
     '''
 
     caps_cli = []
+    if not caps:
+        return caps_cli
 
     for k, v in caps.items():
         # makes sure someone didn't pass an empty var,
@@ -385,14 +443,30 @@ def generate_ceph_authtool_cmd(cluster, name, secret, caps, dest, container_imag
     return cmd
 
 
-def create_key(module, result, cluster, user, user_key, name, secret, caps, import_key, dest, container_image=None):  # noqa: E501
+def import_keyring_cmd(dest, keyring_file, container_image=None):
+    '''
+    Generate 'ceph-authtool <dest> --import-keyring <keyring_file>' command line  # noqa: E501
+    '''
+
+    if container_image:
+        binary = 'ceph-authtool'
+        cmd = container_exec(binary, container_image)
+    else:
+        cmd = ['ceph-authtool']
+
+    cmd.extend([dest, '--import-keyring', keyring_file])
+
+    return cmd
+
+
+def create_key(module, result, cluster, user, user_key, name, secret, caps, import_key, dest, container_image=None, key_type=None):  # noqa: E501
     '''
     Create a CephX key
     '''
 
     cmd_list = []
     if not secret:
-        secret = generate_secret()
+        secret = generate_secret(module, container_image, key_type)
 
     if user == 'client.admin':
         args = ['import', '-i', dest]
@@ -581,20 +655,23 @@ def run_module():
         cluster=dict(type='str', required=False, default='ceph'),
         name=dict(type='str', required=False),
         state=dict(type='str', required=False, default='present', choices=['present', 'update', 'absent',  # noqa: E501
-                                                                           'list', 'info', 'fetch_initial_keys', 'generate_secret']),  # noqa: E501
+                                                                           'list', 'info', 'fetch_initial_keys', 'generate_secret', 'import_keyring']),  # noqa: E501
         caps=dict(type='dict', required=False, default=None),
         secret=dict(type='str', required=False, default=None, no_log=True),
         import_key=dict(type='bool', required=False, default=True),
         dest=dict(type='str', required=False, default='/etc/ceph/'),
+        import_keyring=dict(type='str', required=False, default=None),
         user=dict(type='str', required=False, default='client.admin'),
         user_key=dict(type='str', required=False, default=None),
-        output_format=dict(type='str', required=False, default='json', choices=['json', 'plain', 'xml', 'yaml'])  # noqa: E501
+        output_format=dict(type='str', required=False, default='json', choices=['json', 'plain', 'xml', 'yaml']),  # noqa: E501
+        key_type=dict(type='str', required=False, default=None, choices=['aes', 'aes256k'])  # noqa: E501
     )
 
     module = AnsibleModule(
         argument_spec=module_args,
         supports_check_mode=True,
         add_file_common_args=True,
+        required_if=[['state', 'import_keyring', ['import_keyring']]],
     )
 
     file_args = module.load_file_common_arguments(module.params)
@@ -607,9 +684,11 @@ def run_module():
     secret = module.params.get('secret')
     import_key = module.params.get('import_key')
     dest = module.params.get('dest')
+    import_keyring = module.params.get('import_keyring')
     user = module.params.get('user')
     user_key = module.params.get('user_key')
     output_format = module.params.get('output_format')
+    key_type = module.params.get('key_type')
 
     changed = False
 
@@ -698,7 +777,7 @@ def run_module():
                 module.exit_json(**result)
         if (key_exist == 0 and (secret != _secret or caps != _caps)) or key_exist != 0:  # noqa: E501
             rc, cmd, out, err = exec_commands(module, create_key(
-                module, result, cluster, user, user_key_path, name, secret, caps, import_key, file_path, container_image))  # noqa: E501
+                module, result, cluster, user, user_key_path, name, secret, caps, import_key, file_path, container_image, key_type))  # noqa: E501
             if rc != 0:
                 result["stdout"] = "Couldn't create or update {0}".format(name)
                 result["stderr"] = err
@@ -764,27 +843,37 @@ def run_module():
             file_args['path'] = key_path
             module.set_fs_attributes_if_different(file_args, False)
     elif state == "generate_secret":
-        out = generate_secret().decode()
+        out = generate_secret(module, container_image, key_type)
         cmd = ''
         rc = 0
         err = ''
+        changed = True
+
+    elif state == "import_keyring":
+        if not os.path.isfile(import_keyring):
+            fatal("Keyring file to import '{}' does not exist".format(import_keyring), module)  # noqa: E501
+
+        cmd = import_keyring_cmd(dest, import_keyring, container_image)
+        rc, cmd, out, err = exec_command(module, cmd)
+        if rc != 0:
+            fatal("Failed to import keyring '{}' into '{}': {}".format(import_keyring, dest, err), module)  # noqa: E501
         changed = True
 
     endd = datetime.datetime.now()
     delta = endd - startd
 
     result = dict(
-        cmd=cmd,
+        cmd=cmd if 'cmd' in locals() else '',
         start=str(startd),
         end=str(endd),
         delta=str(delta),
-        rc=rc,
-        stdout=out.rstrip("\r\n"),
-        stderr=err.rstrip("\r\n"),
+        rc=rc if 'rc' in locals() else 0,
+        stdout=out.rstrip("\r\n") if isinstance(out, str) else str(out),
+        stderr=err.rstrip("\r\n") if isinstance(err, str) else str(err),
         changed=changed,
     )
 
-    if rc != 0:
+    if result['rc'] != 0:
         module.fail_json(msg='non-zero return code', **result)
 
     module.exit_json(**result)

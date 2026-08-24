@@ -1,5 +1,22 @@
 #!/usr/bin/python
 
+# Copyright 2020, Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
 from ansible.module_utils.basic import AnsibleModule
 
 import datetime
@@ -217,7 +234,7 @@ def container_exec(binary, container_image, interactive=False):
     Build the docker CLI to run a command inside a container
     '''
 
-    container_binary = os.getenv('CEPH_CONTAINER_BINARY')
+    container_binary = os.getenv('CEPH_CONTAINER_BINARY', 'podman')
     command_exec = [container_binary, 'run']
 
     if interactive:
@@ -299,6 +316,23 @@ def fatal(message, module):
         raise (Exception(message))
 
 
+def detect_ceph_version(module, container_image=None):
+    '''
+    Automatically detect the major version of Ceph running on host/container
+    '''
+    cmd = pre_generate_ceph_cmd(container_image=container_image)
+    cmd.append('--version')
+    rc, out, err = module.run_command(cmd)
+
+    if rc == 0 and out:
+        match = re.search(r'version\s+(\d+)\.', out)
+        if match:
+            return int(match.group(1))
+
+    # Default to 20 if version query fails
+    return 20
+
+
 def build_cmd(action, container_image, cluster='ceph', binary='ceph-volume'):
     '''
     Build the ceph-volume command
@@ -350,7 +384,6 @@ def batch(module, container_image, report=None):
     Batch prepare OSD devices
     '''
 
-    # get module variables
     cluster = module.params['cluster']
     objectstore = module.params['objectstore']
     batch_devices = module.params.get('batch_devices', None)
@@ -372,7 +405,6 @@ def batch(module, container_image, report=None):
     if not batch_devices:
         fatal('batch_devices must be provided if action is "batch"', module)
 
-    # Build the CLI
     action = ['lvm', 'batch']
     cmd = build_cmd(action, container_image, cluster)
     cmd.extend(['--%s' % objectstore])
@@ -441,7 +473,6 @@ def prepare_or_create_osd(module, action, container_image):
     Prepare or create OSD devices
     '''
 
-    # get module variables
     cluster = module.params['cluster']
     objectstore = module.params['objectstore']
     data = module.params['data']
@@ -456,7 +487,6 @@ def prepare_or_create_osd(module, action, container_image):
     crush_device_class = module.params.get('crush_device_class', None)
     dmcrypt = module.params.get('dmcrypt', None)
 
-    # Build the CLI
     action = ['lvm', action]
     cmd = build_cmd(action, container_image, cluster)
     cmd.extend(['--%s' % objectstore])
@@ -489,13 +519,11 @@ def list_osd(module, container_image):
     List will detect wether or not a device has Ceph LVM Metadata
     '''
 
-    # get module variables
     cluster = module.params['cluster']
     data = module.params.get('data', None)
     data_vg = module.params.get('data_vg', None)
     data = get_data(data, data_vg)
 
-    # Build the CLI
     action = ['lvm', 'list']
     cmd = build_cmd(action, container_image, cluster)
     if data:
@@ -522,7 +550,6 @@ def activate_osd():
     Activate all the OSDs on a machine
     '''
 
-    # build the CLI
     action = ['lvm', 'activate']
     container_image = None
     cmd = build_cmd(action, container_image)
@@ -542,23 +569,25 @@ def is_lv(module, vg, lv, container_image):
 
     rc, cmd, out, err = exec_command(module, cmd)
 
-    if rc == 0:
-        result = json.loads(out)['report'][0]['lv']
+    result = []
+    if rc == 0 and out:
+        try:
+            result = json.loads(out)['report'][0]['lv']
+        except (ValueError, KeyError, IndexError):
+            pass
+
     if len(result) > 0:
         return True
 
-        return False
+    return False
 
 
 def zap_devices(module, container_image):
     '''
     Will run 'ceph-volume lvm zap' on all devices, lvs and partitions
-    used to create the OSD. The --destroy flag is always passed so that
-    if an OSD was originally created with a raw device or partition for
-    'data' then any lvs that were created by ceph-volume are removed.
+    used to create the OSD.
     '''
 
-    # get module variables
     data = module.params.get('data', None)
     data_vg = module.params.get('data_vg', None)
     journal = module.params.get('journal', None)
@@ -571,7 +600,6 @@ def zap_devices(module, container_image):
     osd_id = module.params.get('osd_id', None)
     destroy = module.params.get('destroy', True)
 
-    # build the CLI
     action = ['lvm', 'zap']
     cmd = build_cmd(action, container_image)
     if destroy:
@@ -609,7 +637,7 @@ def run_module():
                          'bluestore', 'filestore'], default='bluestore'),
         action=dict(type='str', required=False, choices=[
                     'create', 'zap', 'batch', 'prepare', 'activate', 'list',
-                    'inventory'], default='create'),  # noqa: 4502
+                    'inventory'], default='create'),
         data=dict(type='str', required=False),
         data_vg=dict(type='str', required=False),
         journal=dict(type='str', required=False),
@@ -657,30 +685,16 @@ def run_module():
     if module.check_mode:
         module.exit_json(**result)
 
-    # start execution
     startd = datetime.datetime.now()
-
-    # get the desired action
     action = module.params['action']
-
-    # will return either the image name or None
     container_image = is_containerized()
 
-    # Assume the task's status will be 'changed'
     changed = True
 
-    if action == 'create' or action == 'prepare':
-        # First test if the device has Ceph LVM Metadata
+    if action in ['create', 'prepare']:
         rc, cmd, out, err = exec_command(
             module, list_osd(module, container_image))
 
-        # list_osd returns a dict, if the dict is empty this means
-        # we can not check the return code since it's not consistent
-        # with the plain output
-        # see: http://tracker.ceph.com/issues/36329
-        # FIXME: it's probably less confusing to check for rc
-
-        # convert out to json, ansible returns a string...
         try:
             out_dict = json.loads(out)
         except ValueError:
@@ -692,34 +706,25 @@ def run_module():
             result['rc'] = 0
             module.exit_json(**result)
 
-        # Prepare or create the OSD
         rc, cmd, out, err = exec_command(
             module, prepare_or_create_osd(module, action, container_image))
-        err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
+        err = re.sub(r'[a-zA-Z0-9+/]{38}==', '*' * 8, err)
 
     elif action == 'activate':
         if container_image:
-            fatal(
-                "This is not how container's activation happens, nothing to activate", module)  # noqa: E501
+            fatal("This is not how container's activation happens, nothing to activate", module)  # noqa: E501
 
-        # Activate the OSD
-        rc, cmd, out, err = exec_command(
-            module, activate_osd())
+        rc, cmd, out, err = exec_command(module, activate_osd())
 
     elif action == 'zap':
-        # Zap the OSD
         skip = []
         for device_type in ['journal', 'data', 'db', 'wal']:
-            # 1/ if we passed vg/lv
             if module.params.get('{}_vg'.format(device_type), None) and module.params.get(device_type, None):  # noqa: E501
-                # 2/ check this is an actual lv/vg
                 ret = is_lv(module, module.params['{}_vg'.format(device_type)], module.params[device_type], container_image)  # noqa: E501
                 skip.append(ret)
-                # 3/ This isn't a lv/vg device
                 if not ret:
                     module.params['{}_vg'.format(device_type)] = False
                     module.params[device_type] = False
-            # 4/ no journal|data|db|wal|_vg was passed, so it must be a raw device  # noqa: E501
             elif not module.params.get('{}_vg'.format(device_type), None) and module.params.get(device_type, None):  # noqa: E501
                 skip.append(True)
 
@@ -727,8 +732,7 @@ def run_module():
 
         if any(skip) or module.params.get('osd_fsid', None) \
                 or module.params.get('osd_id', None):
-            rc, cmd, out, err = exec_command(
-                module, cmd)
+            rc, cmd, out, err = exec_command(module, cmd)
             for scan_cmd in ['vgscan', 'lvscan']:
                 module.run_command([scan_cmd, '--cache'])
         else:
@@ -738,20 +742,16 @@ def run_module():
             rc = 0
 
     elif action == 'list':
-        # List Ceph LVM Metadata on a device
         rc, cmd, out, err = exec_command(
             module, list_osd(module, container_image))
 
     elif action == 'inventory':
-        # List storage device inventory.
         rc, cmd, out, err = exec_command(
             module, list_storage_inventory(module, container_image))
 
     elif action == 'batch':
-        # Batch prepare AND activate OSDs
         report = module.params.get('report', None)
 
-        # Add --report flag for the idempotency test
         report_flags = [
             '--report',
             '--format=json',
@@ -761,8 +761,6 @@ def run_module():
         batch_report_cmd = copy.copy(cmd)
         batch_report_cmd.extend(report_flags)
 
-        # Run batch --report to see what's going to happen
-        # Do not run the batch command if there is nothing to do
         rc, cmd, out, err = exec_command(
             module, batch_report_cmd)
         try:
@@ -798,20 +796,15 @@ def run_module():
 
         if not report:
             if 'changed' in report_result:
-                # we have the old batch implementation
-                # if not asking for a report, let's just run the batch command
                 changed = report_result['changed']
                 if changed:
-                    # Batch prepare the OSD
                     rc, cmd, out, err = exec_command(
                         module, batch(module, container_image))
-                    err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
+                    err = re.sub(r'[a-zA-Z0-9+/]{38}==', '*' * 8, err)
             else:
-                # we have the refactored batch, its idempotent so lets just
-                # run it
                 rc, cmd, out, err = exec_command(
                     module, batch(module, container_image))
-                err = re.sub('[a-zA-Z0-9+/]{38}==', '*' * 8, err)
+                err = re.sub(r'[a-zA-Z0-9+/]{38}==', '*' * 8, err)
         else:
             cmd = batch_report_cmd
 
