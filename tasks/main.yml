@@ -103,8 +103,8 @@
   community.general.ini_file:
     section: "{{ item.section }}"
     option: "{{ item.option }}"
-    value: "{{ item.value }}"
     state: "{{ item.state }}"
+    value: "{{ item.value | default(omit) }}"
     path: /etc/ceph/ceph.conf
     mode: "0644"
   loop: "{{ ceph_osd_config }}"
