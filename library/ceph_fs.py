@@ -246,6 +246,28 @@ def detect_ceph_version(module, container_image=None):
     return 20
 
 
+def check_osd_ready(module, container_image=None):
+    '''
+    Check if at least one OSD is up in the cluster
+    '''
+    cluster = module.params.get('cluster')
+    cmd = generate_ceph_cmd(
+        sub_cmd=['osd', 'stat'],
+        args=['--format=json'],
+        cluster=cluster,
+        container_image=container_image
+    )
+    rc, cmd, out, err = exec_command(module, cmd)
+    if rc == 0 and out:
+        try:
+            osd_stat = json.loads(out)
+            if osd_stat.get('num_up_osds', 0) > 0:
+                return True
+        except ValueError:
+            pass
+    return False
+
+
 def create_fs(module, container_image=None):
     '''
     Create a new fs
@@ -447,6 +469,17 @@ def run_module():
     container_image = is_containerized()
 
     if subvolumegroup:
+        if not check_osd_ready(module, container_image=container_image):
+            exit_module(
+                module=module,
+                out="Skipping subvolumegroup operation: OSDs are not ready.",
+                rc=0,
+                cmd="",
+                err="",
+                startd=startd,
+                changed=False
+            )
+
         rc, cmd, out, err = exec_command(module, list_subvolumegroups(module, container_image=container_image))  # noqa: E501
         if rc == 0:
             groups = [group['name'] for group in json.loads(out)]
