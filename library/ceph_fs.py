@@ -506,6 +506,16 @@ def run_module():
                 if rc == 0:
                     changed = True
         else:
+            if not check_osd_ready(module, container_image=container_image):
+                exit_module(
+                    module=module,
+                    out="Skipping filesystem creation: OSDs are not ready.",
+                    rc=0,
+                    cmd="",
+                    err="",
+                    startd=startd,
+                    changed=False
+                )
             rc, cmd, out, err = exec_command(module, create_fs(module, container_image=container_image))  # noqa: E501
             if max_mds and max_mds > 1:
                 exec_command(module, set_fs(module, container_image=container_image))  # noqa: E501
