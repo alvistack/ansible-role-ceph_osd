@@ -40,15 +40,15 @@ ceph_osd_config:
   - { state: present, section: osd, option: osd_recovery_max_active, value: "1" }
   - { state: present, section: osd, option: bluefs_buffered_io, value: "true" }  # true
   - { state: present, section: osd, option: bluestore_cache_autotune, value: "false" }  # true
-  - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.5" }  # 0.45
-  - { state: present, section: osd, option: bluestore_cache_meta_ratio, value: "0.3" }  # 0.45
-  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ ((ceph_memtotal_mb | float) * (128 / 8192) * 1024 * 1024) | int }}" }  # 3Gi / 24 ~= 128Mi
+  - { state: present, section: osd, option: bluestore_cache_kv_ratio, value: "0.6" }  # 0.45
+  - { state: present, section: osd, option: bluestore_cache_meta_ratio, value: "0.2" }  # 0.45
+  - { state: present, section: osd, option: bluestore_cache_size, value: "{{ ((ceph_memtotal_mb | float) * (512 / 8192) * 1024 * 1024) | int }}" }  # 3Gi / 6 ~= 512Mi
   - { state: present, section: osd, option: bluestore_warn_on_bluefs_spillover, value: "false" }
   - { state: present, section: osd, option: osd_disk_threads, value: "1" }  # 1
   - { state: present, section: osd, option: osd_memory_base, value: "{{ ((ceph_memtotal_mb | float) * (128 / 8192) * 1024 * 1024) | int }}" }  # 768Mi / 6 ~= 128Mi
   - { state: present, section: osd, option: osd_memory_target, value: "{{ ((ceph_memtotal_mb | float) * (512 / 8192) * 1024 * 1024) | int }}" }  # 4Gi / 8 ~= 512Mi
   - { state: present, section: osd, option: osd_memory_target_autotune, value: "false" }  # false
-  - { state: present, section: osd, option: osd_op_threads, value: "2" }  # 2
+  - { state: present, section: osd, option: osd_op_threads, value: "4" }  # 2
   - { state: present, section: osd, option: osd_slow_op_warn_timeout, value: "60" }
 
 # Devices to be used as OSDs.
