@@ -16,6 +16,7 @@
 
 _ceph_version: "{{ __ceph_version[ceph_release] }}"
 __ceph_version:
+  "21.2": 21.2.0
   "20.2": 20.2.5
   "19.2": 19.2.7
   "18.2": 18.2.8
